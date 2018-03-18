@@ -1,0 +1,148 @@
+#include <sys/tarfs.h>
+#include <sys/kprintf.h>
+
+void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset);
+int get_parent_index(char *file_name, int slash_count);
+void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
+                uint64_t address, int offset);
+
+
+/***
+ * Inserts the vfs entry at the specified index of the vfs array
+ * @param index where entry is to be made
+ * @param name of the file / directory
+ * @param parent_index of the file / directory
+ * @param size of the file
+ * @param file_type whether it is a file or a directory
+ * @param address of the file / directory
+ * @param offset of the file / directory
+ */
+void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
+                uint64_t address, int offset) {
+  strcpy(vfs[index].name, name);
+  vfs[index].parent = parent_index;
+  vfs[index].size = size;
+  vfs[index].type = file_type;
+  vfs[index].address = address;
+  vfs[index].index = index;
+  vfs[index].offset = offset;
+}
+
+/***
+ * Returns the index of the parent directory from the VFS.
+ * @param file_name whose parent directory is to be returned
+ * @param slash_count depends on whether it is a file(1) or a directory(2)
+ * @return index of the the parent directory in the VFS
+ */
+int get_parent_index(char *file_name, int slash_count) {
+  int length = strlen(file_name);
+  int i;
+  for(i = length - 1; i >= 0 && slash_count; i--) {
+    if(file_name[i] == '/') {
+      slash_count--;
+    }
+  }
+  if(i <= -1) {
+    return -1;
+  }
+
+  char fname[128];
+  //here, i points to the last character of the file_name without the '/'
+  //we have to include '/' while entering it in vfs, hence we use i + 2;
+  strsubcpy(fname, file_name, 0, i + 2);
+  fname[i + 2] = '\0';
+
+  for(i = 0; i < vfs_size; i++) {
+    if(!strcmp(fname, vfs[i].name)) {
+      return i;
+    }
+  }
+  return -2;
+}
+
+/***
+ * Add a single entry in the VFS from the tarfs.
+ * @param tarfs_ptr to the contents in tarfs
+ * @param offset from the current file
+ */
+void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset) {
+  char file_type = tarfs_ptr->typeflag[0];
+
+  if(vfs_size >= MAX_VFS_SIZE || (file_type != TYPE_DIRECTORY && file_type != TYPE_FILE)) {
+    return;
+  }
+
+  char file_name[128];
+  strcpy(file_name, "/rootfs/");
+  strcat(file_name, tarfs_ptr->name);
+  uint64_t file_size = octal_to_binary((unsigned char *)tarfs_ptr->size, 11);
+  uint64_t address = (uint64_t)tarfs_ptr + file_size;
+
+  /*kprintf(" name=%s ", file_name);
+  //kprintf("linkname=%s ", tarfs_ptr->linkname);
+  kprintf("uname=%s ", tarfs_ptr->uname);
+  //kprintf("prefix=%s  ", tarfs_ptr->prefix);
+  kprintf("devmajor=%s  ", tarfs_ptr->devmajor);
+  kprintf("devminor=%s  ", tarfs_ptr->devminor);
+  kprintf("size=%d ", file_size);
+  kprintf("typeflag=%c ", file_type);
+  //kprintf("header=%p", file_tarfs_header);
+  kprintf("\n");*/
+
+  int parent_index = 0;
+  switch(file_type) {
+    case TYPE_FILE:;
+      parent_index = get_parent_index(file_name, 1);
+      break;
+    case TYPE_DIRECTORY:;
+      parent_index = get_parent_index(file_name, 2);
+      break;
+  }
+
+  vfs_insert(vfs_size++, file_name, parent_index, file_size, file_type, address, offset);
+}
+
+/***
+ * Initialize the virtual file system by reading contents from the tarfs.
+ */
+void t_init_tarfs() {
+
+  vfs_insert(0, "/", -1, 0, TYPE_DIRECTORY, 0, 0);
+  vfs_insert(1, "/rootfs/", 0, 0, TYPE_DIRECTORY, 0, 512);
+  vfs_size = 2;
+
+  int offset = 512;
+  struct posix_header_ustar *tarfs_ptr = (struct posix_header_ustar *) &_binary_tarfs_start;
+  int file_number = 0;
+
+  while(tarfs_ptr <= (struct posix_header_ustar *) &_binary_tarfs_end && strlen(tarfs_ptr->name) != 0) {
+    uint64_t file_size = octal_to_binary((unsigned char *)tarfs_ptr->size, 11);
+    char file_type = tarfs_ptr->typeflag[0];
+
+    if(file_size == 0 || file_size % 512 == 0) {
+      offset += file_size + 512;
+    } else {
+      offset += (file_size + (512 - file_size % 512) + 512);
+    }
+
+    vfs_add(tarfs_ptr, offset);
+
+    file_number = (((file_size + 511) / 512) + 1);
+
+    //to skip the file contents
+    if(file_type == TYPE_FILE) {
+      file_number++;
+    }
+    tarfs_ptr += file_number;
+  }
+}
+
+/***
+ * Prints the entire contents of the virtual file system.
+ */
+void t_print_vfs() {
+  for(int i = 0; i < vfs_size; i++) {
+    kprintf("Name = %s, parent = %s, offset = %d, size = %d\n",
+            vfs[i].name, vfs[vfs[i].parent].name, vfs[i].offset, vfs[i].size);
+  }
+}

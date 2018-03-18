@@ -1,0 +1,2 @@
+/Users/rohan/Desktop/CurrentOS/firstFinalOS/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/rohan/Desktop/CurrentOS/firstFinalOS/cmake-build-debug/CMakeFiles/edit_cache.dir
