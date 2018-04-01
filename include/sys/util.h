@@ -26,7 +26,11 @@ static inline void u_save_state(registers *reg) {
     :                        *//* input *//*
     :                        *//* clobbered register *//*
   );*/
-  __asm__ volatile(
+
+
+
+  //had to comment this because of system halt error
+  /*__asm__ volatile(
   "\
       movq %%rsi, %14;\
       movq %%rdi, %13;\
@@ -44,7 +48,7 @@ static inline void u_save_state(registers *reg) {
       movq %%r14, %1;\
       movq %%r15, %0;\
     "
-  : "=r"(reg->r15),        /* output */
+  : "=r"(reg->r15),        *//* output *//*
     "=r"(reg->r14),
     "=r"(reg->r13),
     "=r"(reg->r12),
@@ -67,7 +71,7 @@ static inline void u_save_state(registers *reg) {
     "
   :
   :"m" (reg->rsp)
-  );
+  );*/
 }
 
 //add $0x10, %%rsp;
@@ -97,7 +101,10 @@ static inline void u_revive_state(registers *reg) {
   : "%rax", "%rbx", "%rcx", "%rdx", "%rdi", "%rsi", "%rbp", "%rsp"         *//* clobbered register *//*
   );*/
 
-  __asm__ volatile(
+
+
+  //had to remove this because of system halt error
+  /*__asm__ volatile(
   "\
       movq %0, %%rsp\
     "
@@ -125,7 +132,7 @@ static inline void u_revive_state(registers *reg) {
       retq;\
     "
   :
-  : "r"(reg->r15),        /* input */
+  : "r"(reg->r15),        *//* input *//*
     "r"(reg->r14),
     "r"(reg->r13),
     "r"(reg->r12),
@@ -142,7 +149,7 @@ static inline void u_revive_state(registers *reg) {
     "r"(reg->rsi)
   :"%rbp","%rdi","%rsi","%rax","%rbx","%rcx","%rdx","%r8","%r9","%r10","%r11","%r12","%r13","%r14","%r15"
   );
-  __asm__ volatile("1:");
+  __asm__ volatile("1:");*/
 }
 
 #endif

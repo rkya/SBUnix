@@ -451,6 +451,7 @@ isr_common_stub:
 .extern irq_handler
 # IRQ common stub. It saves processor state, sets up for kernel mode segments
 # calls the C-level fault handler, and finally restores the stack frame.
+
 irq_common_stub:
   # pusha
   pushq %rax
@@ -494,3 +495,33 @@ irq_common_stub:
   add $0x10, %rsp
   sti
   iretq
+
+
+
+
+#irq_common_stub:
+#  # pusha
+#  pushq %rdi
+#  pushq %rax
+#  pushq %rbx
+#  pushq %rcx
+#  pushq %rdx
+#  pushq %rbp
+#  pushq %rsi
+#  pushq %r8
+#  pushq %r9
+#  movq %rsp, %rdi
+#
+#  callq irq_handler
+#
+#  popq %r9
+#  popq %r8
+#  popq %rsi
+#  popq %rbp
+#  popq %rdx
+#  popq %rcx
+#  popq %rbx
+#  popq %rax
+#  popq %rdi
+#  add $16, %rsp
+#  iretq

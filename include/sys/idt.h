@@ -1,4 +1,3 @@
-/*
 #ifndef _IDT_H
 #define _IDT_H
 
@@ -77,8 +76,9 @@ extern void irq128();
 
 
 #endif
-*/
 
+
+/*
 #ifndef _IDT_H
 #define _IDT_H
 
@@ -100,6 +100,7 @@ struct idt_t {
   uint32_t zero;     // reserved
 }__attribute__((packed));
 
+*/
 /*struct idt_t {
   uint16_t low_offset;
   uint16_t selector;
@@ -115,7 +116,8 @@ struct idt_t {
   uint32_t high_offset;
   uint16_t reserved;
 }__attribute__((packed));
-*/
+*//*
+
 
 
 struct idtr_t {
@@ -183,3 +185,4 @@ extern void irq128();
 
 #endif
 
+*/

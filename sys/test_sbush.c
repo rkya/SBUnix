@@ -259,22 +259,21 @@ void sbush_execute_script(char *argv[]) {
 int test_sbush_main() {
 
   kprintf("Inside test sbush\n");
-while(1);
   while(!feof(stdin)){
-    /*char *sbush_cmd = NULL;
-    char current_working_directory[64];*/
+    char *sbush_cmd = NULL;
+    char current_working_directory[64];
 
 //    if(argc == 2){
 //      sbush_execute_script(argv);
 //    }
 
-    /*if(getcwd(current_working_directory, sizeof(current_working_directory)) == NULL) {
+    if(getcwd(current_working_directory, sizeof(current_working_directory)) == NULL) {
       current_working_directory[0] = '\0';
-    }*/
-//    kprintf("%s%s%s", "sbush:", current_working_directory, "$ ");
+    }
+    kprintf("%s%s%s", "sbush:", current_working_directory, "$ ");
 
-    /*sbush_cmd = sbush_get_cmd();
-    sbush_execute_cmd(sbush_cmd);*/
+    sbush_cmd = sbush_get_cmd();
+    sbush_execute_cmd(sbush_cmd);
 
   }
   return 0;

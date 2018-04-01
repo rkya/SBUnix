@@ -41,7 +41,7 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
     uint32_t type;
   }__attribute__((packed)) *smap;
   int index = 0;
-  //uint64_t end = 0;
+  uint64_t end = 0;
   while(modulep[0] != 0x9001) modulep += modulep[1]+2;
   for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
     if (smap->type == 1 /* memory */ && smap->length != 0) {
@@ -49,23 +49,20 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
         break;
       index++;
       kprintf("Available Physical Memory [%p-%p]\n", smap->base, smap->base + smap->length);
-      //end = smap->base + smap->length;
+      end = smap->base + smap->length;
     }
   }
   kprintf("physfree %p\n", (uint64_t)physfree);
   kprintf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
   kprintf("--------------------------------------------------------------------------------");
 
-//  g_init_gdt();
-  init_gdt();
+  g_init_gdt();
   kprintf("Initialized GDT.\n");
 
-//  i_init_idt();
-  idt_install();
-  init_idt();
+  i_init_idt();
   kprintf("Initialized IDT.\n");
 
-  /*pml4 *pml4_t = p_init_paging((uint64_t)physbase, (uint64_t)physfree, end);
+  pml4 *pml4_t = p_init_paging((uint64_t)physbase, (uint64_t)physfree, end);
   kprintf("Initialized paging.\n");
   kprintf("pml4_t = %p\n", pml4_t);
 
@@ -81,15 +78,13 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
   kprintf("Created a new process: %s.\n", sbush->name);
   kprintf("active_queue_size = %d, current_process = %d, pid_allocator_index = %d.\n",
           active_queue_size, current_process, pid_allocator_index);
-*/
+
   /*pcb *p3 = p_get_new_process("p3");
   kprintf("Created a new process: %s.\n", p3->name);
   pcb *p4 = p_get_new_process("p4");
   kprintf("Created a new process: %s.\n", p4->name);
   pcb *p5 = p_get_new_process("p5");
   kprintf("Created a new process: %s.\n", p5->name);*/
-
-while (1);
 
 	loop();
 }

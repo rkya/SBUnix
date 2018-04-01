@@ -15,7 +15,7 @@ int scrollForNextCall = 0;
 int buffer_head = 0;
 int buffer_tail = 0;
 int buffer_size = 0;
-int WAIT_FOR_USER_INPUT = 0;
+static volatile int WAIT_FOR_USER_INPUT = 0;
 registers regs;
 
 void scroll();
@@ -250,7 +250,11 @@ void scroll() {
 char t_read_char_from_screen() {
 
 //  u_save_state(&regs);
-  while (!WAIT_FOR_USER_INPUT);
+  int i = 0;
+  __asm__ __volatile__("sti;");
+  while (!WAIT_FOR_USER_INPUT) {
+    t_write_to_screen("Waiting for user input...%d\n", i++);
+  }
 
   char ch = buffer[buffer_head];
   buffer_head = (buffer_head + 1) % MAX_BUFFER_SIZE;

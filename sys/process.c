@@ -115,8 +115,8 @@ pcb *p_get_new_process(char *name) {
   strcpy(new_pcb->name, name);
   //memcpy(new_pcb->name, name, strlen(name));
 
-  void (*f_ptr3)() = &sbush_function;
-//  int (*f_ptr3)() = &test_sbush_main;
+//  void (*f_ptr3)() = &sbush_function;
+  int (*f_ptr3)() = &test_sbush_main;
   new_pcb->kstack[127] = (uint64_t)f_ptr3;
   new_pcb->rsp = (uint64_t)&new_pcb->kstack[112];
 
