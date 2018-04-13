@@ -15,7 +15,7 @@ int scrollForNextCall = 0;
 int buffer_head = 0;
 int buffer_tail = 0;
 int buffer_size = 0;
-static volatile int WAIT_FOR_USER_INPUT = 0;
+volatile int WAIT_FOR_USER_INPUT = 0;
 registers regs;
 
 void scroll();
@@ -250,19 +250,20 @@ void scroll() {
 char t_read_char_from_screen() {
 
 //  u_save_state(&regs);
-  int i = 0;
-  __asm__ __volatile__("sti;");
+  //int i = 0;
   while (!WAIT_FOR_USER_INPUT) {
-    t_write_to_screen("Waiting for user input...%d\n", i++);
+    //t_write_to_screen("Waiting for user input...%d\n", i++);
   }
 
+  //t_write_to_screen("Out of while loop...\n");
   char ch = buffer[buffer_head];
   buffer_head = (buffer_head + 1) % MAX_BUFFER_SIZE;
-  buffer_size--;
+  buffer_size--;  //not needed as WAIT_FOR_USER_INPUT serves its purpose
 
-  if(ch == '\0') {
+  /*if(ch == '\0') {
     WAIT_FOR_USER_INPUT--;
-  }
+  }*/
+  WAIT_FOR_USER_INPUT--;
 
   return ch;
 }
@@ -280,7 +281,7 @@ char *t_read_line_from_screen() {
   buffer_head = 0;
   buffer_tail = 0;
   buffer_size = 0;
-  WAIT_FOR_USER_INPUT = 1;
+  WAIT_FOR_USER_INPUT = 1;  //this should be 0?
 
   return arr;
 }
@@ -305,18 +306,17 @@ void t_add_to_buffer(char ch) {
         buffer[buffer_tail - 1] = '\0';
       }
     } else {
-      buffer[buffer_tail % MAX_BUFFER_SIZE] = '\0';
+      buffer[buffer_tail % MAX_BUFFER_SIZE] = '\n';
       buffer_tail = (buffer_tail + 1) % MAX_BUFFER_SIZE;
       buffer_size++;
     }
-    WAIT_FOR_USER_INPUT++;
     //u_revive_state(&regs);
   } else if(buffer_size < MAX_BUFFER_SIZE) {
     buffer[buffer_tail % MAX_BUFFER_SIZE] = ch;
     buffer_tail = (buffer_tail + 1) % MAX_BUFFER_SIZE;
     buffer_size++;
   }
-
+  WAIT_FOR_USER_INPUT++;
   t_write_to_screen("%c", ch);
 }
 

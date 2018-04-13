@@ -50,9 +50,18 @@ void fault_handler(registers r)
   outb(0x20, 0x20);
 }
 
+static int millisec = 0;
+static int timer_interrupt_no = 0;
+
 void irq_handler(registers r)
 {
   if(r.int_no == 32) {
+    millisec++;
+    if(millisec >= 100) {
+      //kprintf("Timer interrupt %d...\n", timer_interrupt_no);
+      timer_interrupt_no++;
+      millisec = 0;
+    }
     outb(0x20, 0x20);
     return;
   }

@@ -153,6 +153,25 @@ char *strtok(char *string, const char *delimiter) {
 	int i = token_string_ptr;
 	int j = 0;
 	while(token_string[i] != '\0') {
+		while(token_string[i] != delimiter[j] && delimiter[j] != '\0') {
+			//i++;
+			j++;
+		}
+		if(delimiter[j] == '\0') {
+			j = 0;
+			i++;
+		} else {
+			char *new_token = (char *) malloc (sizeof(char) * (i - token_string_ptr + 1));
+			int l = 0;
+			for(int k = token_string_ptr; k < i; k++, l++) {
+				new_token[l] = token_string[k];
+			}
+			new_token[l] = '\0';
+			token_string_ptr = i + 1;
+			return new_token;
+		}
+	}
+	/*while(token_string[i] != '\0') {
 		while(token_string[i] == delimiter[j] && token_string[i] != '\0') {
 			i++;
 			j++;
@@ -170,12 +189,13 @@ char *strtok(char *string, const char *delimiter) {
 			token_string_ptr = i;
 			return new_token;
 		}
-	}
+	}*/
 	char *new_token = (char *) malloc (sizeof(char) * (strlen(token_string) - token_string_ptr + 1));
 	int l = 0;
-	for(int k = token_string_ptr; k < strlen(token_string) - token_string_ptr; k++, l++) {
+	for(int k = token_string_ptr; k < strlen(token_string); k++, l++) {
 		new_token[l] = token_string[k];
 	}
 	new_token[l] = '\0';
+	token_string_ptr += strlen(new_token);
 	return new_token;
 }

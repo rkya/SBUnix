@@ -7,13 +7,15 @@
 
 #define SBUSH_CMD_BUFFER 128
 #define NEW_LINE 10
+#define COMMAND_MAX_LENGTH 128
+#define COMMAND_MAX_ARGUMENTS 5
 
 static FILE *stderr = NULL;
 static FILE *stdin = NULL;
 
 char **env_variables = NULL;
 
-void sbush_export_command(char **sbush_cmd_tokens) {
+void sbush_export_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
 
   //List all the environment variables if no arguments are passed
   if(sbush_cmd_tokens[1] == NULL) {
@@ -50,7 +52,7 @@ void sbush_export_command(char **sbush_cmd_tokens) {
   }
 }
 
-void sbush_cd_command(char **sbush_cmd_tokens) {
+void sbush_cd_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
   char *home_path;
   int sbush_chdir_ret = 0;
   if(sbush_cmd_tokens[1] == NULL){
@@ -62,6 +64,22 @@ void sbush_cd_command(char **sbush_cmd_tokens) {
   if(sbush_chdir_ret < 0){
     fprintf(stderr, "sbush:error:invalid path to directory or file \n");
   }
+  //system("pwd");
+}
+
+void sbush_ls_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
+  kprintf("Inside ls command.\n");
+  /*char *home_path;
+  int sbush_chdir_ret = 0;
+  if(sbush_cmd_tokens[1] == NULL){
+    home_path = getenv("HOME");
+    sbush_chdir_ret = chdir(home_path);
+  } else {
+    sbush_chdir_ret = chdir(sbush_cmd_tokens[1]);
+  }
+  if(sbush_chdir_ret < 0){
+    fprintf(stderr, "sbush:error:invalid path to directory or file \n");
+  }*/
   //system("pwd");
 }
 
@@ -112,21 +130,20 @@ void sbush_remove_escape_character(char *sbush_cmd) {
   strcpy(sbush_cmd, sbush_cmd_temp);
 }
 
-void sbush_init_tokens(char **sbush_cmd_tokens, int sbush_cmd_tokens_buffer){
-  for(int i = 0; i < sbush_cmd_tokens_buffer; i++)
-    sbush_cmd_tokens[i] = NULL;
+void sbush_init_tokens(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH], int sbush_cmd_tokens_buffer){
+  for(int i = 0; i < COMMAND_MAX_ARGUMENTS; i++)
+    sbush_cmd_tokens[i][0] = '\0';
 }
 
-char ** sbush_cmd_tokenize(char *sbush_cmd) {
+void sbush_cmd_tokenize(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH], char *sbush_cmd) {
   char *token;
   char *delimiters = " \t";
-  char **sbush_cmd_tokens = NULL;
   int position;
   int sbush_cmd_tokens_buffer = SBUSH_CMD_BUFFER;
 
   //sbush_remove_escape_character(sbush_cmd);
 
-  sbush_cmd_tokens = malloc(sizeof(char *) * sbush_cmd_tokens_buffer);
+  //sbush_cmd_tokens = malloc(sizeof(char *) * sbush_cmd_tokens_buffer);
 
   if(!sbush_cmd_tokens){
     fprintf(stderr, "sbush:error:cannot allocate memory\n");
@@ -137,10 +154,10 @@ char ** sbush_cmd_tokenize(char *sbush_cmd) {
 
   position = 0;
 
-  for(token = strtok(sbush_cmd, delimiters); token; token = strtok(NULL, delimiters)){
-    sbush_cmd_tokens[position] = token;
+  for(token = strtok(sbush_cmd, delimiters); strlen(token) > 0 && position < COMMAND_MAX_ARGUMENTS; token = strtok(NULL, delimiters)){
+    strcpy(sbush_cmd_tokens[position], token);
     position++;
-    if(position >= sbush_cmd_tokens_buffer){
+    /*if(position >= sbush_cmd_tokens_buffer){
       sbush_cmd_tokens_buffer += SBUSH_CMD_BUFFER;
       sbush_cmd_tokens = realloc(sbush_cmd_tokens, sbush_cmd_tokens_buffer);
 
@@ -148,10 +165,10 @@ char ** sbush_cmd_tokenize(char *sbush_cmd) {
         fprintf(stderr, "sbush:error:cannot allocate memory\n");
         exit(EXIT_FAILURE);
       }
-    }
+    }*/
   }
 
-  return sbush_cmd_tokens;
+  //return sbush_cmd_tokens;
 }
 
 int sbush_is_input_empty(char *sbush_cmd) {
@@ -164,9 +181,9 @@ int sbush_is_input_empty(char *sbush_cmd) {
 }
 
 void sbush_execute_cmd(char *sbush_cmd) {
-  char **sbush_cmd_tokens;
+  char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH];
   pid_t pid;
-  int return_code;
+//  int return_code;
   int start_background = 0;
   int position = 0;
 
@@ -174,27 +191,41 @@ void sbush_execute_cmd(char *sbush_cmd) {
     return;
   }
 
-  sbush_cmd_tokens = sbush_cmd_tokenize(sbush_cmd);
+  sbush_cmd_tokenize(sbush_cmd_tokens, sbush_cmd);
 
-  while(sbush_cmd_tokens[position] != NULL){
+  while(sbush_cmd_tokens[position][0] != '\0' && position < COMMAND_MAX_ARGUMENTS){
     if(!strcmp(sbush_cmd_tokens[position], "&")){
       start_background = 1;
-      sbush_cmd_tokens[position] = NULL;
+      sbush_cmd_tokens[position][0] = '\0';
     }
     position++;
   }
 
+  /*if(!strcmp(sbush_cmd, "ls")) {
+    sbush_ls_command();
+  } else if(!strcmp(sbush_cmd, "cd")) {
+    sbush_cd_command(sbush_cmd);
+  } else if(!strcmp(sbush_cmd, "export")) {
+    sbush_cd_command(sbush_cmd);
+  }*/
+
+
+
+
   if(!strcmp(sbush_cmd_tokens[0], "cd")) {
     sbush_cd_command(sbush_cmd_tokens);
+  } else if(!strcmp(sbush_cmd_tokens[0], "ls")) {
+    sbush_ls_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
   } else {
     pid = fork();
     if(pid == 0){
-      return_code = execvp(sbush_cmd_tokens[0], sbush_cmd_tokens);
+      //const char *file, char *const argv[]
+      /*return_code = execvp(sbush_cmd_tokens[0], sbush_cmd_tokens);
       if(return_code == -1){
         fprintf(stderr, "sbush:error:no such command:'%s'\n", sbush_cmd_tokens[0]);
-      }
+      }*/
     } else if(pid < 0){
       fprintf(stderr, "sbush:error:Problem while forking\n");
       exit(EXIT_FAILURE);
@@ -271,7 +302,7 @@ int test_sbush_main() {
       current_working_directory[0] = '\0';
     }
     kprintf("%s%s%s", "sbush:", current_working_directory, "$ ");
-
+//while(1);
     sbush_cmd = sbush_get_cmd();
     sbush_execute_cmd(sbush_cmd);
 

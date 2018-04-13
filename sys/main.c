@@ -7,7 +7,7 @@
 #include <sys/idt.h>
 #include <sys/paging.h>
 #include <sys/process.h>
-#include "../include/sys/process.h"
+#include <sys/timer.h>
 
 #define INITIAL_STACK_SIZE 4096
 uint8_t initial_stack[INITIAL_STACK_SIZE]__attribute__((aligned(16)));
@@ -61,6 +61,9 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
 
   i_init_idt();
   kprintf("Initialized IDT.\n");
+
+  /*t_init_timer();
+  kprintf("Initialized Timer.\n");*/
 
   pml4 *pml4_t = p_init_paging((uint64_t)physbase, (uint64_t)physfree, end);
   kprintf("Initialized paging.\n");
