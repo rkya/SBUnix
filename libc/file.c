@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/tarfs.h>
 #include <sys/process.h>
 
 FILE *fopen(const char *file_name, const char *mode) {
@@ -21,12 +22,32 @@ char getc(FILE *file_ptr) {
   return '0';
 }
 
-int open(const char *pathname, int flags) {
+int open(char *pathname, int flags) {
   //check if the file is present in vfs
+  int vfs_index = t_tarfs_get_index(pathname);
+  if(vfs_index == -1) {
+    return -1;
+  }
+
   //check if it is indeed a file and not a directory
+  if(vfs[vfs_index].type == TYPE_DIRECTORY) {
+    return -1;
+  }
+
   //create a new file descriptor
+  pcb *current_process = p_get_current_process();
+  if(current_process->fd_array_size >= MAX_FILE_DESCRIPTORS) {
+    return -1;
+  }
+
+  strcpy(current_process->fd_array[current_process->fd_array_size].name, pathname);
+  current_process->fd_array[current_process->fd_array_size].position = 0;
+  current_process->fd_array[current_process->fd_array_size].file_pointer = vfs_index;
+  current_process->fd_array[current_process->fd_array_size].live = 1;
+  current_process->fd_array_size++;
+
   //return this new file descriptor
-  return 0;
+  return current_process->fd_array_size - 1;
 }
 
 int close(int fd) {
@@ -42,7 +63,7 @@ int close(int fd) {
 }
 
 ssize_t read(int fd, void *buf, size_t count) {
-  return (ssize_t)0;
+  return t_read(fd, (char *)buf, count);
 }
 
 ssize_t write(int fd, const void *buf, size_t count) {

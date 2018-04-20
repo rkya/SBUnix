@@ -8,7 +8,7 @@
 #include <string.h>
 
 #define MAX_PROCESSES 512
-#define MAX_FILE_DESCRIPTORS 32
+#define MAX_FILE_DESCRIPTORS 64
 
 //Difference between file descriptor and file pointer: https://forum.osdev.org/viewtopic.php?f=1&t=9031
 //Information about file descriptor: https://stackoverflow.com/questions/12696315/how-much-information-is-actually-stored-in-a-file-descriptor

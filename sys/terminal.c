@@ -147,8 +147,18 @@ void t_write_to_screen(const char *fmt, ...) {
         case 's':;
           char *str = va_arg(parameters, char *);
           while(*str != 0 && *str != '\0') {
-            *video++ = *str++;
-            *video++ = colour;
+            if(*str == '\n') {
+              print_new_line(&video);
+              if(video >= videoCardEnd) {
+                scroll();
+                video -= 160;
+                videoCardPosition -= 160;
+              }
+              str++;
+            } else {
+              *video++ = *str++;
+              *video++ = colour;
+            }
           }
           break;
         case 'c':;
@@ -219,6 +229,9 @@ void t_init_screen() {
     *p = ' ';
     p += 2;
   }
+
+  videoCardPosition = videoCardStart;
+  scrollForNextCall = 0;
 
   //set cursor position
   outb(0x3D4, 0x0F);

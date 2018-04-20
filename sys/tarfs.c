@@ -224,6 +224,10 @@ ssize_t t_read(int fd, char *buffer, uint64_t size) {
     buffer[buffer_index] = *(vfs[current_process->fd_array[fd].file_pointer].contents + i);
   }
   buffer[buffer_index] = '\0';
+
+  //update the file_pointer
+  current_process->fd_array[fd].position = i;
+
   //return the value min(size, remaining file)
   return (ssize_t)(i - previous_position);
 }

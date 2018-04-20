@@ -6,6 +6,7 @@
 #include <test_sbush.h>
 #include <sys/kprintf.h>
 #include <sys/process.h>
+#include <sys/terminal.h>
 
 #define SBUSH_CMD_BUFFER 128
 #define NEW_LINE 10
@@ -139,8 +140,22 @@ void sbush_ps_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_L
   p_print_all_active_processes();
 }
 
+void sbush_clear_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
+  t_init_screen();
+}
+
 void sbush_cat_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
-  p_print_all_active_processes();
+  int fd = open(sbush_cmd_tokens[1], 1);
+  char buffer[128];
+  if(fd > -1) {
+    while(read(fd, buffer, sizeof(buffer)) > 0) {
+      kprintf("%s", buffer);
+    }
+    close(fd);
+  } else {
+    kprintf("Could not open file: %s", sbush_cmd_tokens[1]);
+  }
+  kprintf("\n");
 }
 
 char * sbush_get_cmd() {
@@ -280,6 +295,8 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_ps_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "cat")) {
     sbush_cat_command(sbush_cmd_tokens);
+  } else if(!strcmp(sbush_cmd_tokens[0], "clear")) {
+    sbush_clear_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
   } else {
