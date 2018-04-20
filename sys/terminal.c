@@ -15,6 +15,7 @@ int scrollForNextCall = 0;
 int buffer_head = 0;
 int buffer_tail = 0;
 int buffer_size = 0;
+volatile int NEW_LINE_RECEIVED = 0;
 volatile int WAIT_FOR_USER_INPUT = 0;
 registers regs;
 
@@ -145,7 +146,7 @@ void t_write_to_screen(const char *fmt, ...) {
       switch(*fmt) {
         case 's':;
           char *str = va_arg(parameters, char *);
-          while(*str != 0) {
+          while(*str != 0 && *str != '\0') {
             *video++ = *str++;
             *video++ = colour;
           }
@@ -249,8 +250,6 @@ void scroll() {
 
 char t_read_char_from_screen() {
 
-//  u_save_state(&regs);
-  //int i = 0;
   while (!WAIT_FOR_USER_INPUT) {
     //t_write_to_screen("Waiting for user input...%d\n", i++);
   }
@@ -264,11 +263,16 @@ char t_read_char_from_screen() {
     WAIT_FOR_USER_INPUT--;
   }*/
   WAIT_FOR_USER_INPUT--;
+  if(ch == '\n') {
+    NEW_LINE_RECEIVED--;
+  }
 
   return ch;
 }
 
 char *t_read_line_from_screen() {
+  while (!NEW_LINE_RECEIVED);
+
   char *arr = (char *) kmalloc(sizeof(char) * (buffer_size + 1));
   int i = 0;
   for(int j = buffer_head;
@@ -281,7 +285,8 @@ char *t_read_line_from_screen() {
   buffer_head = 0;
   buffer_tail = 0;
   buffer_size = 0;
-  WAIT_FOR_USER_INPUT = 1;  //this should be 0?
+  WAIT_FOR_USER_INPUT = 0;  //this should be 0?
+  NEW_LINE_RECEIVED = 0;
 
   return arr;
 }
@@ -301,20 +306,23 @@ void t_add_to_buffer(char ch) {
   if(ch == '\n') {
     if(buffer_size >= MAX_BUFFER_SIZE) {
       if(buffer_tail == 0) {
-        buffer[MAX_BUFFER_SIZE - 1] = '\0';
+        buffer[MAX_BUFFER_SIZE - 1] = '\n';
       } else {
-        buffer[buffer_tail - 1] = '\0';
+        buffer[buffer_tail - 1] = '\n';
       }
     } else {
       buffer[buffer_tail % MAX_BUFFER_SIZE] = '\n';
       buffer_tail = (buffer_tail + 1) % MAX_BUFFER_SIZE;
       buffer_size++;
+      //WAIT_FOR_USER_INPUT++;
     }
+    NEW_LINE_RECEIVED++;
     //u_revive_state(&regs);
   } else if(buffer_size < MAX_BUFFER_SIZE) {
     buffer[buffer_tail % MAX_BUFFER_SIZE] = ch;
     buffer_tail = (buffer_tail + 1) % MAX_BUFFER_SIZE;
     buffer_size++;
+    //WAIT_FOR_USER_INPUT++;
   }
   WAIT_FOR_USER_INPUT++;
   t_write_to_screen("%c", ch);
@@ -327,9 +335,19 @@ void t_add_to_buffer(char ch) {
  */
 void t_backspace() {
   //erase previous character from buffer
+
+  if(buffer_size == 0) {
+    return;
+  }
+
   if(buffer_tail > 0) {
     buffer_tail--;
+  } else if(buffer_tail == 0) {
+    buffer_tail = MAX_BUFFER_SIZE - 1;
   }
+
+  buffer_size--;
+  WAIT_FOR_USER_INPUT--;
 
   //set the previous character as blank on screen
   videoCardPosition -= 2;

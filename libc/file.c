@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/process.h>
 
 FILE *fopen(const char *file_name, const char *mode) {
   //TODO: Implement code to read file contents from tarfs...
@@ -21,10 +22,22 @@ char getc(FILE *file_ptr) {
 }
 
 int open(const char *pathname, int flags) {
+  //check if the file is present in vfs
+  //check if it is indeed a file and not a directory
+  //create a new file descriptor
+  //return this new file descriptor
   return 0;
 }
 
 int close(int fd) {
+  pcb *current_process = p_get_current_process();
+
+  if(fd >= current_process->fd_array_size) {
+    return 0;
+  }
+
+  current_process->fd_array[fd].live = 0;
+
   return 1;
 }
 

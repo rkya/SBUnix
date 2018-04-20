@@ -1,6 +1,5 @@
 #include <sys/process.h>
 #include <sys/kprintf.h>
-#include "../include/sys/process.h"
 //#include <test_sbush.h>
 
 void switch_to(pcb*, pcb*);
@@ -32,6 +31,15 @@ void p_init_process() {
 
   for(int i = 0; i < MAX_PROCESSES; i++) {
     active_queue[i] = NULL;
+  }
+}
+
+void p_print_all_active_processes() {
+  kprintf("Name | pid | ppid\n");
+  for(int i = 1; i < MAX_PROCESSES; i++) {
+    if(active_queue[i] != NULL && active_queue[i]->state == RUNNING) {
+      kprintf("%s | %d | %d\n", active_queue[i]->name, active_queue[i]->pid, active_queue[i]->ppid);
+    }
   }
 }
 
@@ -119,6 +127,14 @@ pcb *p_get_new_process(char *name) {
   int (*f_ptr3)() = &test_sbush_main;
   new_pcb->kstack[127] = (uint64_t)f_ptr3;
   new_pcb->rsp = (uint64_t)&new_pcb->kstack[112];
+
+  strcpy(new_pcb->fd_array[0].name, "stdin");
+  strcpy(new_pcb->fd_array[1].name, "stdout");
+  strcpy(new_pcb->fd_array[2].name, "stderr");
+  new_pcb->fd_array[0].live = 1;
+  new_pcb->fd_array[1].live = 1;
+  new_pcb->fd_array[2].live = 1;
+  new_pcb->fd_array_size = 3;
 
   return new_pcb;
 }

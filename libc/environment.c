@@ -37,3 +37,7 @@ char * getenv(char *name) {
   }
   return NULL;
 }
+
+void e_init_environment() {
+  putenv("HOME=/");
+}

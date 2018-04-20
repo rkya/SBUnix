@@ -1,10 +1,10 @@
 #include <sys/tarfs.h>
 #include <sys/kprintf.h>
 
-void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset);
+void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents);
 int get_parent_index(char *file_name, int slash_count);
 void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
-                uint64_t address, int offset);
+                uint64_t address, int offset, char *contents);
 
 
 /***
@@ -18,7 +18,7 @@ void vfs_insert(int index, char *name, int parent_index, uint64_t size, char fil
  * @param offset of the file / directory
  */
 void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
-                uint64_t address, int offset) {
+                uint64_t address, int offset, char *contents) {
   strcpy(vfs[index].name, name);
   vfs[index].parent = parent_index;
   vfs[index].size = size;
@@ -26,6 +26,7 @@ void vfs_insert(int index, char *name, int parent_index, uint64_t size, char fil
   vfs[index].address = address;
   vfs[index].index = index;
   vfs[index].offset = offset;
+  vfs[index].contents = contents;
 }
 
 /***
@@ -65,7 +66,7 @@ int get_parent_index(char *file_name, int slash_count) {
  * @param tarfs_ptr to the contents in tarfs
  * @param offset from the current file
  */
-void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset) {
+void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents) {
   char file_type = tarfs_ptr->typeflag[0];
 
   if(vfs_size >= MAX_VFS_SIZE || (file_type != TYPE_DIRECTORY && file_type != TYPE_FILE)) {
@@ -95,11 +96,12 @@ void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset) {
       parent_index = get_parent_index(file_name, 1);
       break;
     case TYPE_DIRECTORY:;
+      contents = NULL;
       parent_index = get_parent_index(file_name, 2);
       break;
   }
 
-  vfs_insert(vfs_size++, file_name, parent_index, file_size, file_type, address, offset);
+  vfs_insert(vfs_size++, file_name, parent_index, file_size, file_type, address, offset, contents);
 }
 
 /***
@@ -107,8 +109,8 @@ void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset) {
  */
 void t_init_tarfs() {
 
-  vfs_insert(0, "/", -1, 0, TYPE_DIRECTORY, 0, 0);
-  vfs_insert(1, "/rootfs/", 0, 0, TYPE_DIRECTORY, 0, 512);
+  vfs_insert(0, "/", -1, 0, TYPE_DIRECTORY, 0, 0, NULL);
+  vfs_insert(1, "/rootfs/", 0, 0, TYPE_DIRECTORY, 0, 512, NULL);
   vfs_size = 2;
 
   int offset = 512;
@@ -125,14 +127,39 @@ void t_init_tarfs() {
       offset += (file_size + (512 - file_size % 512) + 512);
     }
 
-    vfs_add(tarfs_ptr, offset);
+    vfs_add(tarfs_ptr, offset, (char *)((uint64_t)tarfs_ptr + sizeof(struct posix_header_ustar)));
 
     file_number = (((file_size + 511) / 512) + 1);
 
+//    char *file_ptr = NULL;
     //to skip the file contents
     if(file_type == TYPE_FILE) {
       file_number++;
+
+//      file_ptr = (char *)((uint64_t)tarfs_ptr + sizeof(struct posix_header_ustar));
+      //kprintf("file_ptr = %p\n", file_ptr);
+      //print file contents
+      //kprintf("-------------->%c<-----\n", *((char *)((uint64_t)tarfs_ptr + sizeof(struct posix_header_ustar))));
+      /*for(int k = 0; k < 10; k++) {
+        kprintf("-------------->%c<-----\n", *(((char *) ((uint64_t) tarfs_ptr + sizeof(struct posix_header_ustar))) + k));
+      }*/
     }
+
+    //kprintf("next file address = %p\n", tarfs_ptr + file_number);
+
+//    int l = 0;
+    //kprintf("name=%s\n", tarfs_ptr->name);
+    //while(!strcmp(tarfs_ptr->name, "/rootfs/etc/test.txt") && file_ptr != NULL && l < 15 /*&& file_ptr < (char *)tarfs_ptr*/) {
+    /*if(file_type == TYPE_FILE) {
+      kprintf("name=%s\n", tarfs_ptr->name);
+    }
+    for(int j = 0; j < octal_to_binary((unsigned char *)tarfs_ptr->size, 11); j++) {
+      kprintf("%c", *file_ptr);
+      file_ptr++;
+//      l++;
+    }
+    kprintf("\n");*/
+
     tarfs_ptr += file_number;
   }
 }
@@ -145,4 +172,58 @@ void t_print_vfs() {
     kprintf("Name = %s, parent = %s, offset = %d, size = %d\n",
             vfs[i].name, vfs[vfs[i].parent].name, vfs[i].offset, vfs[i].size);
   }
+}
+
+/**
+ * Gets the index of the file in the vfs
+ * @param complete absolute path to the file
+ * @return index in the vfs array, -1 if file not found
+ */
+int t_tarfs_get_index(const char *filename) {
+  int index = 0;
+  while(strcmp(vfs[index].name, filename) && index < vfs_size) {
+    index++;
+  }
+  return index < vfs_size ? index : -1;
+}
+
+/**
+ * Finds the children of a particular directory
+ * @param vfs_indexes array where the indexes of the children will be written
+ * @param vfs_indexes_size size of vfs_indexes
+ * @return number of indexes filled, will be less than or equal to vfs_indexes_size
+ */
+int t_get_children_index(const char *name, int *vfs_indexes, int vfs_indexes_size) {
+  int j = 0;
+  for(int i = 0; i < vfs_size && j < vfs_indexes_size; i++) {
+    if(!strcmp(vfs[vfs[i].parent].name, name)) {
+      vfs_indexes[j++] = i;
+    }
+  }
+  return j;
+}
+
+ssize_t t_read(int fd, char *buffer, uint64_t size) {
+  //get current process
+  pcb *current_process = p_get_current_process();
+  //check if the file descriptor is present
+  if(fd >= current_process->fd_array_size || !current_process->fd_array[fd].live) {
+    return (ssize_t)0;
+  }
+  //check if the file_pointer < size of file
+  if(current_process->fd_array[fd].position >= vfs[current_process->fd_array[fd].file_pointer].size) {
+    return (ssize_t)0;
+  }
+  //take min(size, remaining file) and put it in the buffer
+  int previous_position = current_process->fd_array[fd].position;
+  int i = 0;
+  int buffer_index = 0;
+  for(i = current_process->fd_array[fd].position;
+      i < size - 1 && i < vfs[current_process->fd_array[fd].file_pointer].size;
+      i++, buffer_index++) {
+    buffer[buffer_index] = *(vfs[current_process->fd_array[fd].file_pointer].contents + i);
+  }
+  buffer[buffer_index] = '\0';
+  //return the value min(size, remaining file)
+  return (ssize_t)(i - previous_position);
 }

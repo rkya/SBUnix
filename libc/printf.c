@@ -6,5 +6,6 @@
 
 
 int printf(const char *format, ...) {
+  //kprintf(format);
   return 1;
 }

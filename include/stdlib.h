@@ -15,5 +15,6 @@ void *realloc(void * , size_t );
 
 int putenv(char * );
 char * getenv(char * );
+void e_init_environment();
 
 #endif
