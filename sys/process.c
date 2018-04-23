@@ -173,8 +173,8 @@ void switch_to(pcb *p1, pcb *p2){
   :
   :"m" (p1->rsp)
   );
-  kprintf("Value in rsp p1 is %p\n", p1->rsp);
-  kprintf("value in rsp p2 is %p\n", p2->rsp);
+//  kprintf("Value in rsp p1 is %p\n", p1->rsp);
+//  kprintf("value in rsp p2 is %p\n", p2->rsp);
   __asm__ volatile(
   "\
       movq %0, %%rsp\
@@ -213,7 +213,7 @@ void p_set_process_name(pcb *process, char *name) {
   strcpy(process->name, name);
 }
 
-void p_switch_to_user_mode() {
+/*void p_switch_to_user_mode() {
   pcb *curr_process = p_get_current_process();
   set_tss_rsp(curr_process->kstack);
   //These steps are referred from the James Molloy kernel development tutorials
@@ -238,4 +238,64 @@ void p_switch_to_user_mode() {
 		iret; \
 		1: \
 		");
+}*/
+
+void p_switch_to_user_mode() {
+  pcb *curr_process = p_get_current_process();
+  set_tss_rsp(curr_process->kstack);
+  //These steps are referred from the James Molloy kernel development tutorials
+  //Link: http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
+  __asm__ volatile(" cli; ");
+	__asm__ volatile("	movq $0x23, %rax; ");
+	__asm__ volatile("	movq %rax, %ds; ");
+	__asm__ volatile("	movq %rax, %es; ");
+	__asm__ volatile("	movq %rax, %fs; ");
+	__asm__ volatile("	movq %rax, %gs; ");
+	__asm__ volatile("	movq %rsp, %rax; ");
+	__asm__ volatile("	pushq $0x23; ");
+	__asm__ volatile("	pushq %rax; ");
+	__asm__ volatile("	pushf; ");
+
+	__asm__ volatile("	popq %rax ; ");
+	__asm__ volatile("	orq $0x200, %rax ; ");
+	__asm__ volatile("	push %rax ; ");
+
+	__asm__ volatile("	pushq $0x2B; ");  //gdt.c values
+  //push return address
+//	__asm__ volatile("	push $1f; ");
+  //user space rsp
+  //user space stack seg
+  //eflags
+  //user space code seg
+  //user space instruction pointer
+	__asm__ volatile("	iretq; ");
+//	__asm__ volatile("	1: ");
 }
+
+/*
+void p_switch_to_user_mode() {
+  pcb *curr_process = p_get_current_process();
+  set_tss_rsp(curr_process->kstack);
+  //These steps are referred from the James Molloy kernel development tutorials
+  //Link: http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
+  __asm__ volatile("  \
+		cli; \
+		movq %rax, $0x23; \
+		movq %ds, %rax; \
+		movq %es, %rax; \
+		movq %fs, %rax; \
+		movq %gs, %rax; \
+								 \
+		movq %rax, %rsp; \
+		pushq $0x23; \
+		pushq %rax; \
+		pushf; \
+		popq %rax ; \
+		orq $0x200, %rax ; \
+		push %rax ; \
+		pushq $0x1B; \
+		push $1f; \
+		iret; \
+		1: \
+		");
+}*/

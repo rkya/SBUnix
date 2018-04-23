@@ -54,9 +54,16 @@ int waitpid(int pid, int *status) {
 }
 
 unsigned int sleep(unsigned int seconds) {
-  //TODO: find approximately correct number for this loop and later use timer for exact one second sleep.
-  for(int i = 0; i < 10000000; i++);
-  return 1;
+  pcb *current_process = p_get_current_process();
+  current_process->remaining_sleep_time = seconds;
+  current_process->state = SLEEPING;
+
+  /*while (current_process->remaining_sleep_time > 0) {
+    yield();
+  }*/
+  yield();
+
+  return 0;
 }
 
 pid_t getpid(void) {

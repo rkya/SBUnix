@@ -6,6 +6,8 @@
 #include <sys/io.h>
 #include <sys/keyboard.h>
 #include <sys/registers.h>
+#include <sys/timer.h>
+#include <sys/syscall.h>
 
 void fault_handler(registers );
 

@@ -45,13 +45,13 @@ pml4 *p_init_paging(uint64_t physbase, uint64_t physfree, uint64_t end) {
   //map kernel
   //map pages from physfree to the start of the free list in page tables
   page_table_walk(KERNBASE + physbase, KERNBASE + (uint64_t) end,
-                  (uint64_t) physbase, pml4_t, KERNEL_ACCESSIBLE);
+                  (uint64_t) physbase, pml4_t, USER_ACCESSIBLE);
 //  page_table_walk(KERNBASE + physbase, KERNBASE + (uint64_t)free_list_head, (uint64_t) physbase, pml4_t);
 
   //map video card
   //map pages from (8000)_16 to (8000)_16 + (4000)_10 bytes
   page_table_walk(KERNBASE + (uint64_t) 0xb8000, KERNBASE + (uint64_t) 0xb8FA0,
-                  (uint64_t) 0xb8000, pml4_t, KERNEL_ACCESSIBLE);
+                  (uint64_t) 0xb8000, pml4_t, USER_ACCESSIBLE);
   //print_va_to_pa(KERNBASE + (uint64_t)0x201230 ,pml4_t);
 
   //set cr3
@@ -77,7 +77,7 @@ void page_table_walk(uint64_t start, uint64_t end, uint64_t paddr, pml4 *pml4_t,
   uint64_t i;
   uint64_t size = end - start;
 
-  kprintf("Size for page table walk = %d\n", size);
+//  kprintf("Size for page table walk = %d\n", size);
   //size = 0x5e5c000 for kernel
 
   if(size % PAGESIZE == 0) {
@@ -125,9 +125,9 @@ void create_frames(uint64_t physfree, uint64_t end) {
   } else {
     n_pg_list = size_list / PAGESIZE;
   }
-  kprintf("size of page list is : %p and number of pages used to store it%p\n", size_list, n_pg_list);
+//  kprintf("Size of page list is %d and the number of pages used to store it are %d.\n", size_list, n_pg_list);
   start_addr_of_fl = physfree + n_pg_list * PAGESIZE;
-  kprintf("The start of free pages is %p\n", start_addr_of_fl);
+//  kprintf("The start of free pages is %p.\n", start_addr_of_fl);
   create_free_list(start_addr_of_fl);
 }
 
@@ -154,7 +154,7 @@ void create_free_list(uint64_t start_addr_of_fl) {
       temp = temp->nxtPage;
     }
   }
-  kprintf("Free_list_head : %p\n", free_list_head->b_addr);
+//  kprintf("Free_list_head : %p.\n", free_list_head->b_addr);
 }
 
 /***

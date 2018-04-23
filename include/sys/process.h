@@ -30,12 +30,13 @@ typedef struct pcb {
   uint64_t pid;
   uint64_t ppid;
   uint64_t rsp;
-  enum {RUNNING, SLEEPING, ZOMBIE} state;
+  enum {RUNNING, SLEEPING, ZOMBIE, TERMINATED} state;
   int exit_status;
   mm_struct *mm_struct_ptr;
   uint64_t pml4e;
   file_descriptor fd_array[MAX_FILE_DESCRIPTORS]; //also can be typecasted to FILE **fd_array
   int fd_array_size;
+  unsigned int remaining_sleep_time;
 } pcb;
 
 pcb *active_queue[MAX_PROCESSES];

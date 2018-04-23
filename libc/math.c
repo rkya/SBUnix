@@ -34,3 +34,21 @@ uint64_t power(uint64_t base, uint64_t pow) {
 	}
 	return answer;
 }
+
+int stoi(char *str) {
+  int negative = 0;
+  int number = 0;
+  int index = 0;
+
+  if(str[index] == '-') {
+    negative = 1;
+    index++;
+  }
+
+  while(str[index] >= '0' && str[index] <= '9') {
+    number = number * 10 + str[index] - '0';
+    index++;
+  }
+
+  return negative ? number * -1 : number;
+}

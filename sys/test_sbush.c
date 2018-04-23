@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <test_sbush.h>
 #include <sys/kprintf.h>
 #include <sys/process.h>
 #include <sys/terminal.h>
+#include <sys/syscall.h>
+#include <environment.h>
 
 #define SBUSH_CMD_BUFFER 128
 #define NEW_LINE 10
@@ -16,16 +19,19 @@
 static FILE *stderr = NULL;
 static FILE *stdin = NULL;
 
+//extern char environment_variables[MAX_ENV_VARIABLES][MAX_ENV_VARIABLES_SIZE];
+//extern int environment_variables_size;
+
 char **env_variables = NULL;
 
 void sbush_export_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
 
   //List all the environment variables if no arguments are passed
-  if(sbush_cmd_tokens[1] == NULL) {
-    char **temp_env_variables;
-    for(temp_env_variables = env_variables; *temp_env_variables; temp_env_variables++) {
-      printf("%s\n", *temp_env_variables);
-    }
+  if(sbush_cmd_tokens[1][0] == '\0') {
+    /*for(int i = 0; i < environment_variables_size; i++) {
+      kprintf("%s\n", environment_variables[i]);
+    }*/
+    e_print_all_variables();
   } else {
     char *delimiters = "=";
     char *env_variable_name, *env_variable_value;
@@ -33,25 +39,27 @@ void sbush_export_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_M
     env_variable_value = strtok(NULL, delimiters);
 
     //return if the argument is not in a proper format
-    if(!env_variable_name || !env_variable_value || env_variable_value[0] != '"' ||
-      env_variable_value[strlen(env_variable_value) - 1] != '"') {
+    if(env_variable_name == NULL || strlen(env_variable_name) == 0 ||
+      env_variable_value == NULL || strlen(env_variable_value) == 0 ) {
       fprintf(stderr, "sbush:error:invalid export command format \n");
       return;
     }
 
     //create a proper string for the putenv()
-    env_variable_value[strlen(env_variable_value) - 1] = '\0';
+    /*env_variable_value[strlen(env_variable_value) - 1] = '\0';
     char *env_string = (char *)
       malloc (sizeof(char) * (strlen(env_variable_name) + strlen(env_variable_value)));
     env_string[0] = '\0';
     strcat(env_string, env_variable_name);
     strcat(env_string, "=");
     strcat(env_string, &env_variable_value[1]);
-    if(putenv(env_string)) {
+     */
+
+    if(putenv(sbush_cmd_tokens[1])) {
       fprintf(stderr, "sbush:error:putenv could not set the environment variable \n");
-    } else {
-      printf("New value set for %s: %s\n", env_variable_name, getenv(env_variable_name));
-    }
+    }/* else {
+      kprintf("New value set for %s: %s\n", env_variable_name, getenv(env_variable_name));
+    }*/
   }
 }
 
@@ -132,12 +140,27 @@ void sbush_echo_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX
       kprintf("%s\n", &sbush_cmd_tokens[1][1]);
     }
   } else {
-    kprintf("%s\n", sbush_cmd_tokens[1]);
+    if(sbush_cmd_tokens[1][0] == '$' && sbush_cmd_tokens[1][1] != '\0') {
+      char *env_value = getenv(&sbush_cmd_tokens[1][1]);
+      if(env_value != NULL) {
+        kprintf("%s", env_value);
+      }
+      kprintf("\n");
+    } else {
+      kprintf("%s\n", sbush_cmd_tokens[1]);
+    }
   }
 }
 
 void sbush_ps_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
   p_print_all_active_processes();
+}
+
+void sbush_sleep_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
+  int time_in_sec = stoi(sbush_cmd_tokens[1]);
+  if(time_in_sec > 0) {
+    sleep(time_in_sec);
+  }
 }
 
 void sbush_clear_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
@@ -295,10 +318,22 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_ps_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "cat")) {
     sbush_cat_command(sbush_cmd_tokens);
-  } else if(!strcmp(sbush_cmd_tokens[0], "clear")) {
+  }/* else if(!strcmp(sbush_cmd_tokens[0], "clear")) {
     sbush_clear_command(sbush_cmd_tokens);
+  }*/ else if(!strcmp(sbush_cmd_tokens[0], "sleep")) {
+    sbush_sleep_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
+  } else if(!strcmp(sbush_cmd_tokens[0], "user")) {
+    //p_switch_to_user_mode();
+    kprintf("In user mode.\n");
+    int val;
+    __asm__ __volatile__ (
+    "int $0x80;"
+    : "=a" (val)
+    : "0"(SYSCALL_KPRINTF)
+    : "cc", "rcx", "r11", "memory"
+    );
   } else {
     kprintf("%s: command not found\n", sbush_cmd_tokens[0]);
     pid = fork();
@@ -308,7 +343,7 @@ void sbush_execute_cmd(char *sbush_cmd) {
       if(return_code == -1){
         fprintf(stderr, "sbush:error:no such command:'%s'\n", sbush_cmd_tokens[0]);
       }*/
-    } else if(pid < 0){
+    } else if(pid < 0) {
       fprintf(stderr, "sbush:error:Problem while forking\n");
       exit(EXIT_FAILURE);
     } else {
@@ -371,10 +406,10 @@ void sbush_execute_script(char *argv[]) {
 
 int test_sbush_main() {
 
-  kprintf("Inside test sbush\n");
+//  kprintf("Inside test sbush\n");
 
-  e_init_environment();
-  kprintf("Initialized environment.\n");
+  /*e_init_environment();
+  kprintf("Initialized environment.\n");*/
 
   while(!feof(stdin)){
     char *sbush_cmd = NULL;
@@ -389,13 +424,13 @@ int test_sbush_main() {
     }
     kprintf("%s%s%s", "sbush:", current_working_directory, "$ ");
 
+    /*char *ch = (char *) malloc(sizeof(char) * 2);
+    ch[0] = 'j';
+    ch[1] = '\0';
+    kprintf("%s\n", ch);*/
     sbush_cmd = sbush_get_cmd();
     sbush_execute_cmd(sbush_cmd);
 
   }
   return 0;
-}
-
-void function_cat(char *filename) {
-
 }

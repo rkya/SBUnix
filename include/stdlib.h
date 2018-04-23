@@ -2,6 +2,7 @@
 #define _STDLIB_H
 
 #include <sys/defs.h>
+#include <environment.h>
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
@@ -15,6 +16,5 @@ void *realloc(void * , size_t );
 
 int putenv(char * );
 char * getenv(char * );
-void e_init_environment();
 
 #endif

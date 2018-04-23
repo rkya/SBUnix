@@ -1,6 +1,5 @@
 #include <sys/isr.h>
 #include <sys/kprintf.h>
-//#include <sys/syscall.h>
 
 /* implementation details for isr are referred from http://www.osdever.net/bkerndev/Docs/isrs.htm */
 
@@ -50,19 +49,21 @@ void fault_handler(registers r)
   outb(0x20, 0x20);
 }
 
-static int millisec = 0;
-static int timer_interrupt_no = 0;
+//static int millisec = 0;
+//static int timer_interrupt_no = 0;
 
 void irq_handler(registers r)
 {
   if(r.int_no == 32) {
-    millisec++;
+    /*millisec++;
     if(millisec >= 100) {
       //kprintf("Timer interrupt %d...\n", timer_interrupt_no);
       timer_interrupt_no++;
       millisec = 0;
-    }
+    }*/
+    t_timer_interrupt_action();
     outb(0x20, 0x20);
+
     return;
   }
   if (r.int_no >= 40 && r.int_no != 128) {
@@ -74,7 +75,7 @@ void irq_handler(registers r)
     keyboard_interrupt();
   }
   if(r.int_no == 128) {
-    //syscall_handler(&r);
+    s_syscall_handler(&r);
   }
 
   // send reset signal to master

@@ -8,6 +8,7 @@
 #include <sys/paging.h>
 #include <sys/process.h>
 #include <sys/timer.h>
+#include <environment.h>
 
 #define INITIAL_STACK_SIZE 4096
 uint8_t initial_stack[INITIAL_STACK_SIZE]__attribute__((aligned(16)));
@@ -17,7 +18,7 @@ extern char kernmem, physbase;
 
 void loop() {
   while(1) {
-    kprintf("Reached the end of start function...\n");
+//    kprintf("Reached the end of start function...\n");
     //p_remove_process(p_get_current_process());
     yield();
   }
@@ -62,25 +63,29 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
   i_init_idt();
   kprintf("Initialized IDT.\n");
 
-  /*t_init_timer();
-  kprintf("Initialized Timer.\n");*/
+  t_init_timer();
+  kprintf("Initialized Timer.\n");
 
-  pml4 *pml4_t = p_init_paging((uint64_t)physbase, (uint64_t)physfree, end);
+  /*pml4 *pml4_t = */
+  p_init_paging((uint64_t)physbase, (uint64_t)physfree, end);
   kprintf("Initialized paging.\n");
-  kprintf("pml4_t = %p\n", pml4_t);
+//  kprintf("pml4_t = %p\n", pml4_t);
 
   t_init_tarfs();
   kprintf("Initialized tarfs.\n");
-  t_print_vfs();
-  kprintf("\n");
+  /*t_print_vfs();
+  kprintf("\n");*/
 
   p_init_process();
   kprintf("Initialized processes.\n");
   add_first_process();
   pcb *sbush = p_get_new_process("sbush");
   kprintf("Created a new process: %s.\n", sbush->name);
-  kprintf("active_queue_size = %d, current_process = %d, pid_allocator_index = %d.\n",
-          active_queue_size, current_process, pid_allocator_index);
+  /*kprintf("active_queue_size = %d, current_process = %d, pid_allocator_index = %d.\n",
+          active_queue_size, current_process, pid_allocator_index);*/
+
+  e_init_environment();
+  kprintf("Initialized environment.\n");
 
   /*pcb *p3 = p_get_new_process("p3");
   kprintf("Created a new process: %s.\n", p3->name);
