@@ -1,11 +1,10 @@
 #include <stdio.h>
-//#include "../include/sys/kprintf.h"
-//#include <sys/kprintf.h>
-
-//extern void kprintf(const char *fmt, ...);
-
+#include <string.h>
+#include <sys/terminal.h>
 
 int printf(const char *format, ...) {
-  //kprintf(format);
-  return 1;
+  /*char *arr = t_read_line_from_screen();
+  char ds[3];
+  strcpy(ds, arr);*/
+  return 0;
 }

@@ -10,6 +10,7 @@
 #include <sys/terminal.h>
 #include <sys/syscall.h>
 #include <environment.h>
+#include <signal.h>
 
 #define SBUSH_CMD_BUFFER 128
 #define NEW_LINE 10
@@ -71,6 +72,25 @@ void sbush_pwd_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
   } else {
     fprintf(stderr, "sbush:error:invalid directory \n");
   }
+}
+
+void sbush_kill_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
+  if(sbush_cmd_tokens[1][0] == '\0') {
+    kprintf("Usage: kill pid\n");
+    return;
+  }
+
+  int pid = (pid_t)stoi(sbush_cmd_tokens[1]);
+  int ret_val = kill(pid, SIGKILL);
+  if(ret_val == 0) {
+    kprintf("Process with pid %d killed.\n", pid);
+  } else {
+    kprintf("Could not kill process with pid %d.\n", pid);
+  }
+}
+
+void sbush_shutdown_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
+  shutdownOS();
 }
 
 void sbush_cd_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
@@ -306,7 +326,9 @@ void sbush_execute_cmd(char *sbush_cmd) {
   }
 
   //kprintf("Command: %s\n", sbush_cmd);
-  if(!strcmp(sbush_cmd_tokens[0], "pwd")) {
+  if(!strcmp(sbush_cmd_tokens[0], "")) {
+    return;
+  } else if(!strcmp(sbush_cmd_tokens[0], "pwd")) {
     sbush_pwd_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "cd")) {
     sbush_cd_command(sbush_cmd_tokens);
@@ -324,6 +346,10 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_sleep_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
+  } else if(!strcmp(sbush_cmd_tokens[0], "kill")) {
+    sbush_kill_command(sbush_cmd_tokens);
+  } else if(!strcmp(sbush_cmd_tokens[0], "shutdown")) {
+    sbush_shutdown_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "user")) {
     //p_switch_to_user_mode();
     kprintf("In user mode.\n");

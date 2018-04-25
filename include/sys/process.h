@@ -27,9 +27,10 @@ typedef struct pcb {
   uint64_t stack[512]; //This stack should be accessible by the user
   char name[128];
   char current_directory[MAX_PATH_SIZE];
-  uint64_t pid;
-  uint64_t ppid;
+  pid_t pid;
+  pid_t ppid;
   uint64_t rsp;
+  uint64_t rip;
   enum {RUNNING, SLEEPING, ZOMBIE, TERMINATED} state;
   int exit_status;
   mm_struct *mm_struct_ptr;
@@ -51,7 +52,8 @@ void p_set_process_name(pcb *, char *);
 void p_init_process();
 pcb *p_get_current_process();
 int p_remove_process(pcb *);
-void p_switch_to_user_mode();
+int p_remove_process_by_id(pid_t process_id);
+void p_switch_to_user_mode(pcb *);
 void p_print_all_active_processes();
 
 #endif

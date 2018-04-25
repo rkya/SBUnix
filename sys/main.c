@@ -76,16 +76,17 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
   /*t_print_vfs();
   kprintf("\n");*/
 
+  e_init_environment();
+  kprintf("Initialized environment.\n");
+
   p_init_process();
   kprintf("Initialized processes.\n");
   add_first_process();
-  pcb *sbush = p_get_new_process("sbush");
+  pcb *sbush = p_get_new_process("/rootfs/bin/sbush");
   kprintf("Created a new process: %s.\n", sbush->name);
   /*kprintf("active_queue_size = %d, current_process = %d, pid_allocator_index = %d.\n",
           active_queue_size, current_process, pid_allocator_index);*/
 
-  e_init_environment();
-  kprintf("Initialized environment.\n");
 
   /*pcb *p3 = p_get_new_process("p3");
   kprintf("Created a new process: %s.\n", p3->name);

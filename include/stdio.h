@@ -2,7 +2,7 @@
 #define _STDIO_H
 
 #include <sys/defs.h>
-#include <sys/kprintf.h>
+//#include <sys/kprintf.h>
 
 static const int EOF = -1;
 //static FILE *stderr = NULL;

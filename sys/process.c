@@ -1,5 +1,7 @@
 #include <sys/process.h>
 #include <sys/kprintf.h>
+#include "../include/sys/process.h"
+//#include <main_function.h>
 //#include <test_sbush.h>
 
 void switch_to(pcb*, pcb*);
@@ -7,11 +9,13 @@ uint64_t get_new_process_no();
 int add_to_active_queue(pcb *);
 void sbush_function();
 int test_sbush_main();
+//int main(int argc, char *argv[], char *envp[]);
 
 
 void sbush_function() {
   while (1) {
     kprintf("Inside sbush by process %s...\n", p_get_current_process()->name);
+    //main(1, NULL, NULL);
     /*char **a = NULL;
     char **b = NULL;
     int c = 0;
@@ -101,6 +105,23 @@ int p_remove_process(pcb *process) {
   return -1;
 }
 
+int p_remove_process_by_id(pid_t process_id) {
+  int i;
+
+  for(i = 0; i < MAX_PROCESSES; i++) {
+    if(active_queue[i] != NULL && process_id == active_queue[i]->pid) {
+      if(active_queue[i]->state == ZOMBIE) {
+        return 1;
+      } else {
+        active_queue[i]->state = ZOMBIE;
+        active_queue_size--;
+        return 1;
+      }
+    }
+  }
+  return -1;
+}
+
 void yield() {
   schedule();
 }
@@ -108,7 +129,7 @@ void yield() {
 pcb *p_get_new_process(char *name) {
   pcb *new_pcb = (pcb *) kmalloc (sizeof(pcb));
 
-  new_pcb->pid = get_new_process_no();
+  new_pcb->pid = (pid_t)get_new_process_no();
   if(add_to_active_queue(new_pcb) == -1) {
     //TODO: free the used memeory
     return NULL;
@@ -119,12 +140,15 @@ pcb *p_get_new_process(char *name) {
   new_pcb->mm_struct_ptr->map_count = 0;
   new_pcb->mm_struct_ptr->vma_head = NULL;
   new_pcb->mm_struct_ptr->vma_tail = NULL;
-  new_pcb->ppid = current_process;
+  new_pcb->ppid = (pid_t)current_process;
   strcpy(new_pcb->name, name);
   //memcpy(new_pcb->name, name, strlen(name));
 
 //  void (*f_ptr3)() = &sbush_function;
   int (*f_ptr3)() = &test_sbush_main;
+  /*char **temp_a = NULL;
+  char **temp_b = NULL;*/
+//  int (*f_ptr3)(int, char **, char **) = &main;
   new_pcb->kstack[127] = (uint64_t)f_ptr3;
   new_pcb->rsp = (uint64_t)&new_pcb->kstack[112];
 
@@ -213,33 +237,38 @@ void p_set_process_name(pcb *process, char *name) {
   strcpy(process->name, name);
 }
 
-/*void p_switch_to_user_mode() {
-  pcb *curr_process = p_get_current_process();
-  set_tss_rsp(curr_process->kstack);
+void p_switch_to_user_mode(pcb *process) {
+  set_tss_rsp(process->kstack);
   //These steps are referred from the James Molloy kernel development tutorials
   //Link: http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
   __asm__ volatile("  \
 		cli; \
-		movq $0x23, %rax; \
-		movq %rax, %ds; \
-		movq %rax, %es; \
-		movq %rax, %fs; \
-		movq %rax, %gs; \
+		movq $0x23, %%rax; \
+		movq %%rax, %%ds; \
+		movq %%rax, %%es; \
+		movq %%rax, %%fs; \
+		movq %%rax, %%gs; \
 								 \
-		movq %rsp, %rax; \
+		movq %0, %%rax; \
 		pushq $0x23; \
-		pushq %rax; \
-		pushf; \
-		popq %rax ; \
-		orq $0x200, %rax ; \
-		push %rax ; \
-		pushq $0x1B; \
-		push $1f; \
+		pushq %%rax; \
+                 \
+		pushfq; \
+		popq %%rax ; \
+		orq $0x200, %%rax ; \
+		push %%rax ; \
+                 \
+		pushq $0x2B; \
+		pushq %1; \
 		iret; \
 		1: \
-		");
-}*/
+		"
+    :
+    : "r" (process->rsp), "r"(process->rip)
+  );
+}
 
+/*
 void p_switch_to_user_mode() {
   pcb *curr_process = p_get_current_process();
   set_tss_rsp(curr_process->kstack);
@@ -271,6 +300,7 @@ void p_switch_to_user_mode() {
 	__asm__ volatile("	iretq; ");
 //	__asm__ volatile("	1: ");
 }
+*/
 
 /*
 void p_switch_to_user_mode() {
@@ -298,4 +328,5 @@ void p_switch_to_user_mode() {
 		iret; \
 		1: \
 		");
-}*/
+}
+*/
