@@ -1,7 +1,7 @@
 # Introduction
 
 This is a preemptive operating system called SBUnix developed as a part of operating systems course in Stony Brook University.
-I have implemented paging, free list, kmalloc, interrupts, scheduling, context switching and syscalls.
+I have implemented paging, free list, kmalloc, interrupts, scheduling, context switching, terminal and syscalls. SBUnix also contains binaries like echo, sleep, cat, ls, kill and ps.
 
 # Running The OS
 
