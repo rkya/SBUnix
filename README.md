@@ -86,7 +86,7 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     kill 1
     ```
     If you kill a process with pid > 1, the process will be killed.<br/>
-    But if you try to kill process with pid 1, SBUnix will as you if you
+    But if you try to kill process with pid 1, SBUnix will ask you if you
     want to shut down the system as this is the special sbush process
     which runs as soon as you start the SBUnix.
   * Shutdown SBUnix
