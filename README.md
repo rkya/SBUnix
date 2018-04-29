@@ -116,8 +116,8 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
 ## Testing preemptive task switching
 
   * Uncomment the two lines in the ```switch_to()``` function present
-  in the /sys/process.c:304, 305.
-  * You will see something like every 1 second:
+  in the ```/sys/process.c:304``` and ```/sys/process.c:305```.
+  * You will see something like this every 1 second:
     ```
     Value in rsp p1 is 0xffffffff8026b590
     value in rsp p2 is 0xffffffff80396200
@@ -133,13 +133,14 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   received a timer interrupt which called the scheduler and the current
   process got switched to process B with the rsp 0xffffffff80396200.
   The other process B is the original process that initialized the
-  SBUnix and created a process sbush and it does not have anything
+  SBUnix and created a process - sbush and it does not have anything
   significant to work, hence it yeilds in a continuous ```while()```
   loop. As the B yeilds, the scheduler kicks in and swithcs to A back
   as there are no other processes. So, you see line 3 and 4 where the
   switch happens from process B to process A. This change happens
   immediately, hence you will see the 4 lines printed continuously in a
   interval of 1 second. <br/>
-  I have currently set the preemptive switching frequency to 1 second
-  for the ease of testing. You can set it to the frequency of the
-  timer interrupt of SBUnix i.e. 100 times per second.
+  Note that the addresses printed may vary.<br/>
+  I have currently set the preemptive switching frequency to 1 switch
+  per second for the ease of testing. You can set it to the frequency
+  of the timer interrupt of SBUnix i.e. 100 times per second.
