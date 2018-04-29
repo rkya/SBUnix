@@ -4,7 +4,8 @@
 void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents);
 int get_parent_index(char *file_name, int slash_count);
 void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
-                uint64_t address, int offset, char *contents);
+                uint64_t address, int offset, char *contents, struct posix_header_ustar *);
+
 
 
 /***
@@ -18,7 +19,7 @@ void vfs_insert(int index, char *name, int parent_index, uint64_t size, char fil
  * @param offset of the file / directory
  */
 void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,
-                uint64_t address, int offset, char *contents) {
+                uint64_t address, int offset, char *contents, struct posix_header_ustar * tarfs_ptr) {
   strcpy(vfs[index].name, name);
   vfs[index].parent = parent_index;
   vfs[index].size = size;
@@ -27,6 +28,7 @@ void vfs_insert(int index, char *name, int parent_index, uint64_t size, char fil
   vfs[index].index = index;
   vfs[index].offset = offset;
   vfs[index].contents = contents;
+  vfs[index].tarfs_ptr = tarfs_ptr;
 }
 
 /***
@@ -101,7 +103,7 @@ void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents) {
       break;
   }
 
-  vfs_insert(vfs_size++, file_name, parent_index, file_size, file_type, address, offset, contents);
+  vfs_insert(vfs_size++, file_name, parent_index, file_size, file_type, address, offset, contents, tarfs_ptr);
 }
 
 /***
@@ -109,8 +111,8 @@ void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents) {
  */
 void t_init_tarfs() {
 
-  vfs_insert(0, "/", -1, 0, TYPE_DIRECTORY, 0, 0, NULL);
-  vfs_insert(1, "/rootfs/", 0, 0, TYPE_DIRECTORY, 0, 512, NULL);
+  vfs_insert(0, "/", -1, 0, TYPE_DIRECTORY, 0, 0, NULL, NULL);
+  vfs_insert(1, "/rootfs/", 0, 0, TYPE_DIRECTORY, 0, 512, NULL, NULL);
   vfs_size = 2;
 
   int offset = 512;
@@ -230,4 +232,25 @@ ssize_t t_read(int fd, char *buffer, uint64_t size) {
 
   //return the value min(size, remaining file)
   return (ssize_t)(i - previous_position);
+}
+
+Elf64_Ehdr *t_get_elf_header(char *filename) {
+  int file_index = t_tarfs_get_index(filename);
+  if(file_index < 0 || file_index >= MAX_VFS_SIZE) {
+    return NULL;
+  }
+  struct posix_header_ustar *tarfs_ptr = vfs[file_index].tarfs_ptr;
+  //struct Elf64_Ehdr *p = (struct Elf64_Ehdr *)((traverse_tarfs(filename)));
+  //void *temp = (void *)((traverse_tarfs(filename)));
+  //Elf64_Ehdr *p = (Elf64_Ehdr *) traverse_tarfs(filename);
+  if(tarfs_ptr == NULL) {
+    kprintf("File not found.\n");
+    return NULL;
+  } else {
+    kprintf("tarfs_ptr->name: %s.\n", tarfs_ptr->name);
+    Elf64_Ehdr *elf64_ehdr_ptr = (Elf64_Ehdr *)((char *)tarfs_ptr + sizeof(struct posix_header_ustar));
+    //Elf64_Ehdr *ehdr = (Elf64_Ehdr *)p;
+    kprintf("elf64_ehdr_ptr->e_ident[1] = %c.\n", elf64_ehdr_ptr->e_ident[1]);
+    return elf64_ehdr_ptr;
+  }
 }

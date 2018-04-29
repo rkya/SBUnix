@@ -199,6 +199,9 @@ void sbush_cat_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
     kprintf("Could not open file: %s", sbush_cmd_tokens[1]);
   }
   kprintf("\n");
+
+
+
 }
 
 char * sbush_get_cmd() {
@@ -342,9 +345,9 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_cat_command(sbush_cmd_tokens);
   }/* else if(!strcmp(sbush_cmd_tokens[0], "clear")) {
     sbush_clear_command(sbush_cmd_tokens);
-  }*/ else if(!strcmp(sbush_cmd_tokens[0], "sleep")) {
+  }*/ /*else if(!strcmp(sbush_cmd_tokens[0], "sleep")) {
     sbush_sleep_command(sbush_cmd_tokens);
-  } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
+  }*/ else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "kill")) {
     sbush_kill_command(sbush_cmd_tokens);
@@ -352,14 +355,16 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_shutdown_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "user")) {
     //p_switch_to_user_mode();
-    kprintf("In user mode.\n");
-    int val;
+    int ans = printf("Testing syscall from printf.\n");
+    ans = printf("returned value = %d.\n", ans);
+    printf("returned value = %d.\n", return_value);
+    /*int val;
     __asm__ __volatile__ (
     "int $0x80;"
     : "=a" (val)
     : "0"(SYSCALL_KPRINTF)
     : "cc", "rcx", "r11", "memory"
-    );
+    );*/
   } else {
     kprintf("%s: command not found\n", sbush_cmd_tokens[0]);
     pid = fork();
@@ -444,6 +449,9 @@ int test_sbush_main() {
 //    if(argc == 2){
 //      sbush_execute_script(argv);
 //    }
+
+    /*pcb *temp = p_get_current_process();
+    kprintf("pid = %d\n", temp->pid);*/
 
     if(getcwd(current_working_directory, sizeof(current_working_directory)) == NULL) {
       current_working_directory[0] = '\0';

@@ -5,6 +5,7 @@
 #include <math.h>
 #include <sys/defs.h>
 #include <sys/process.h>
+#include <sys/elf64.h>
 
 #define MAX_VFS_SIZE 2048
 #define TYPE_DIRECTORY '5'
@@ -43,6 +44,7 @@ typedef struct virtual_file_system {
   int index;
   int offset;
   char *contents;
+  struct posix_header_ustar *tarfs_ptr;
 } virtual_file_system;
 
 virtual_file_system vfs[MAX_VFS_SIZE];
@@ -54,12 +56,12 @@ void t_print_vfs();
 int t_tarfs_get_index(const char *);
 int t_get_children_index(const char *, int *, int);
 ssize_t t_read(int , char *, uint64_t );
+Elf64_Ehdr *t_get_elf_header(char *);
 /*uint64_t tar_lookup(char *);
 uint64_t tar_ls(char *);
 void get_file_content(char *);
 int test_offset(char *);
 int get_file_offset(char *);
-//Elf64_Ehdr *get_elf(char *);
 struct posix_header_ustar *get_tarfs(char *);
 struct posix_header_ustar *traverse_tarfs(char *);
 struct file *open_tarfs(struct posix_header_ustar *);*/

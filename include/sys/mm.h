@@ -3,6 +3,15 @@
 #include <sys/defs.h>
 #include <sys/paging.h>
 
+#define VMA_TYPE_GENERAL 1
+#define VMA_TYPE_TEXT 2
+#define VMA_TYPE_DATA 3
+#define PFLAG_READ 0X4
+#define PFLAG_WRITE 0X2
+#define PFLAG_EXECUTE 0X1
+#define PFLAG_READ_EXECUTE ((PFLAG_READ) | (PFLAG_EXECUTE))
+#define PFLAG_READ_WRITE ((PFLAG_READ) | (PFLAG_WRITE))
+
 /*
 	Structure refereneces:
 	https://notes.shichao.io/lkd/ch15/
@@ -10,7 +19,7 @@
 typedef struct mm_struct {
   struct vm_area_struct *vma_head, *vma_tail;
   int map_count;
-  //uint64_t mm_struct_start, mm_struct_end;
+  uint64_t elf_vaddr_start, elf_vaddr_end;
   int mm_struct_type;
   int access_right;
 } mm_struct;
@@ -20,6 +29,9 @@ typedef struct vm_area_struct {
   uint64_t vma_start, vma_end;
   struct vm_area_struct *next_vma;
   uint64_t file_ptr;
+  uint64_t file_offset;
+  uint64_t file_size;
+  uint64_t file_bss_size;
   uint64_t flags;
   uint64_t offset;
   uint64_t mmsz;

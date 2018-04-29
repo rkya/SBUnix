@@ -5,6 +5,7 @@
 #include <sys/mm.h>
 #include <sys/gdt.h>
 #include <sys/paging.h>
+#include <sys/elf64.h>
 #include <string.h>
 
 #define MAX_PROCESSES 512
@@ -31,7 +32,8 @@ typedef struct pcb {
   pid_t ppid;
   uint64_t rsp;
   uint64_t rip;
-  enum {RUNNING, SLEEPING, ZOMBIE, TERMINATED} state;
+  enum {RUNNING, SLEEPING, WAITING, ZOMBIE, TERMINATED} state;
+  pid_t wait_return_pid;
   int exit_status;
   mm_struct *mm_struct_ptr;
   uint64_t pml4e;
@@ -51,9 +53,11 @@ pcb *p_get_new_process(char *);
 void p_set_process_name(pcb *, char *);
 void p_init_process();
 pcb *p_get_current_process();
+pcb *p_get_parent_process(pcb *);
 int p_remove_process(pcb *);
 int p_remove_process_by_id(pid_t process_id);
 void p_switch_to_user_mode(pcb *);
 void p_print_all_active_processes();
+int p_has_child_processes(pcb *);
 
 #endif

@@ -1,9 +1,13 @@
 #include <sys/process.h>
 #include <sys/kprintf.h>
-#include "../include/sys/process.h"
 //#include <main_function.h>
 //#include <test_sbush.h>
 
+#define HEX_ONE_THOUSAND 0x1000
+
+extern Elf64_Ehdr *t_get_elf_header(char *);
+
+int load_binary(pcb *);
 void switch_to(pcb*, pcb*);
 uint64_t get_new_process_no();
 int add_to_active_queue(pcb *);
@@ -40,7 +44,7 @@ void p_init_process() {
 
 void p_print_all_active_processes() {
   kprintf("Name | pid | ppid\n");
-  for(int i = 1; i < MAX_PROCESSES; i++) {
+  for(int i = 0; i < MAX_PROCESSES; i++) {
     if(active_queue[i] != NULL && active_queue[i]->state == RUNNING) {
       kprintf("%s | %d | %d\n", active_queue[i]->name, active_queue[i]->pid, active_queue[i]->ppid);
     }
@@ -126,7 +130,108 @@ void yield() {
   schedule();
 }
 
-pcb *p_get_new_process(char *name) {
+/***
+ * Loads the executable from the path present in the process->name
+ * @param process pcb pointer of the process
+ * @return 1 if successful 0 if unsuccessful but load test_sbush and -1 if unsuccessful
+ */
+int load_binary(pcb *process) {
+  return 0;
+  Elf64_Ehdr *elf64_ehdr_ptr = t_get_elf_header(process->name);
+
+  if(elf64_ehdr_ptr == NULL) {
+    return 0;
+  }
+
+  Elf64_Phdr *elf64_phdr_ptr = (Elf64_Phdr *)((uint64_t ) elf64_ehdr_ptr + elf64_ehdr_ptr->e_phoff);
+
+  if(elf64_phdr_ptr == NULL) {
+    return 0;
+  }
+
+  kprintf("ehdr = %p, phdr = %p.\n", elf64_ehdr_ptr, elf64_phdr_ptr);
+
+  //process->rip = elf64_ehdr_ptr->e_entry;
+  process->kstack[127] = 0x23;
+  //process->rsp = (uint64_t) &(process->stack[511]);
+  process->kstack[126] = (uint64_t) &(process->kstack[127]);
+  process->kstack[125] = 0x200202;
+  process->kstack[124] = 0x2B;
+  int (*f_ptr5)() = &test_sbush_main;
+  process->kstack[123] = (uint64_t)f_ptr5;
+  void (*f_ptr4)() = &schedule;
+  process->kstack[107] = (uint64_t)f_ptr4; //address of scheduler/timer //127 - 20
+  process->rsp = (uint64_t) &(process->kstack[106]);
+  //process->kstack[106] = (uint64_t) &(process->stack[511]); //new rsp
+
+    //schedule it
+
+
+  for(int i = 0; i < elf64_ehdr_ptr->e_phnum; i++, elf64_phdr_ptr++) {
+    if(elf64_phdr_ptr->p_type != 1) {
+      continue;
+    }
+
+    vm_area_struct *vm_area_struct_ptr = (vm_area_struct *) kmalloc(sizeof(vm_area_struct));
+    vm_area_struct_ptr->next_vma = NULL;
+    vm_area_struct_ptr->file_ptr = (uint64_t )NULL;
+    vm_area_struct_ptr->type = VMA_TYPE_GENERAL;
+    vm_area_struct_ptr->flags = elf64_phdr_ptr->p_flags;
+
+    if(process->mm_struct_ptr->vma_tail == NULL) {
+      process->mm_struct_ptr->vma_tail = vm_area_struct_ptr;
+      process->mm_struct_ptr->vma_head = vm_area_struct_ptr;
+    } else {
+      process->mm_struct_ptr->vma_tail->next_vma = vm_area_struct_ptr;
+      process->mm_struct_ptr->vma_tail = vm_area_struct_ptr;
+    }
+    process->mm_struct_ptr->map_count++;
+
+    vm_area_struct_ptr->vma_start = elf64_phdr_ptr->p_vaddr;
+    vm_area_struct_ptr->vma_end = vm_area_struct_ptr->vma_start + elf64_phdr_ptr->p_memsz;
+
+
+    //not sure if required as page walk is already done
+    /*uint64_t binary_size = (process->mm_struct_ptr->elf_vaddr_end / HEX_ONE_THOUSAND) * HEX_ONE_THOUSAND -
+                          (process->mm_struct_ptr->elf_vaddr_start / HEX_ONE_THOUSAND) * HEX_ONE_THOUSAND +
+                           HEX_ONE_THOUSAND;
+    uint64_t pages_required = binary_size / HEX_ONE_THOUSAND;
+    uint64_t start_address = kmalloc((uint64_t)binary_size);
+    //map binary
+    //map pages from physfree to the start of the free list in page tables
+    page_table_walk(KERNBASE + physbase, KERNBASE + (uint64_t) end,
+                    (uint64_t) physbase, pml4_t, USER_ACCESSIBLE);*/
+
+    if(elf64_phdr_ptr->p_flags == PFLAG_READ_WRITE || elf64_phdr_ptr->p_flags == PFLAG_READ_EXECUTE) {
+      process->mm_struct_ptr->elf_vaddr_start = elf64_phdr_ptr->p_vaddr;
+      process->mm_struct_ptr->elf_vaddr_end = process->mm_struct_ptr->elf_vaddr_start + elf64_phdr_ptr->p_memsz;
+
+      vm_area_struct_ptr->file_ptr = (uint64_t) elf64_ehdr_ptr;
+      vm_area_struct_ptr->file_offset = elf64_phdr_ptr->p_offset;
+      vm_area_struct_ptr->file_size = elf64_phdr_ptr->p_filesz;
+
+      memcpy((void *) vm_area_struct_ptr->vma_start,
+             (void *) ((uint64_t) elf64_ehdr_ptr + elf64_phdr_ptr->p_offset),
+             elf64_phdr_ptr->p_filesz);
+
+      if(elf64_phdr_ptr->p_flags == PFLAG_READ_EXECUTE) {
+        vm_area_struct_ptr->file_bss_size = 0;
+        vm_area_struct_ptr->type = VMA_TYPE_TEXT;
+      } else {
+        vm_area_struct_ptr->file_bss_size = elf64_phdr_ptr->p_memsz - elf64_phdr_ptr->p_filesz;
+        vm_area_struct_ptr->type = VMA_TYPE_DATA;
+      }
+    }
+  }
+
+  //call switch to user mode
+  p_switch_to_user_mode(process);
+
+  return 0;
+}
+
+pcb *p_get_new_process(char *filename) {
+  //create new process
   pcb *new_pcb = (pcb *) kmalloc (sizeof(pcb));
 
   new_pcb->pid = (pid_t)get_new_process_no();
@@ -135,23 +240,31 @@ pcb *p_get_new_process(char *name) {
     return NULL;
   }
 
+  //assign basic details needed for process execution
   strcpy(new_pcb->current_directory, "/");
-  new_pcb->mm_struct_ptr = (mm_struct *) ((char *)(new_pcb + 1));
+  //new_pcb->mm_struct_ptr = (mm_struct *) ((char *)(new_pcb + 1));
+  new_pcb->mm_struct_ptr = (mm_struct *) kmalloc(sizeof(mm_struct));
   new_pcb->mm_struct_ptr->map_count = 0;
   new_pcb->mm_struct_ptr->vma_head = NULL;
   new_pcb->mm_struct_ptr->vma_tail = NULL;
   new_pcb->ppid = (pid_t)current_process;
-  strcpy(new_pcb->name, name);
-  //memcpy(new_pcb->name, name, strlen(name));
+  strcpy(new_pcb->name, filename);
 
-//  void (*f_ptr3)() = &sbush_function;
-  int (*f_ptr3)() = &test_sbush_main;
-  /*char **temp_a = NULL;
-  char **temp_b = NULL;*/
+  //load the binary in the kstack and make it ready for execution
+  int binary_loaded = load_binary(new_pcb);
+  if(binary_loaded == 0) {
+    //  void (*f_ptr3)() = &sbush_function;
+    int (*f_ptr3)() = &test_sbush_main;
+    /*char **temp_a = NULL;
+    char **temp_b = NULL;*/
 //  int (*f_ptr3)(int, char **, char **) = &main;
-  new_pcb->kstack[127] = (uint64_t)f_ptr3;
-  new_pcb->rsp = (uint64_t)&new_pcb->kstack[112];
+    new_pcb->kstack[127] = (uint64_t)f_ptr3;
+    new_pcb->rsp = (uint64_t)&new_pcb->kstack[112];
+  } else if(binary_loaded < 0) {
+    return NULL;
+  }
 
+  //assign file descriptors for input/output and error
   strcpy(new_pcb->fd_array[0].name, "stdin");
   strcpy(new_pcb->fd_array[1].name, "stdout");
   strcpy(new_pcb->fd_array[2].name, "stderr");
@@ -165,6 +278,29 @@ pcb *p_get_new_process(char *name) {
 
 pcb *p_get_current_process() {
   return active_queue[current_process];
+}
+
+pcb *p_get_parent_process(pcb *process) {
+  for(int i = 0; i < MAX_PROCESSES; i++) {
+    if(active_queue[i] != NULL && !strcmp(active_queue[i]->name, process->name)) {
+      return active_queue[i];
+    }
+  }
+  return NULL;
+}
+
+/***
+ * Returns if a process has atleast 1 child
+ * @param process pcb pointer of the process
+ * @return 1 if it has atleast 1 child, 0 otherwise
+ */
+int p_has_child_processes(pcb *process) {
+  for(int i = 1; i < MAX_PROCESSES; i++) {
+    if(active_queue[i] != NULL && active_queue[i]->ppid == process->pid) {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 void switch_to(pcb *p1, pcb *p2){
@@ -198,7 +334,7 @@ void switch_to(pcb *p1, pcb *p2){
   :"m" (p1->rsp)
   );
 //  kprintf("Value in rsp p1 is %p\n", p1->rsp);
-//  kprintf("value in rsp p2 is %p\n", p2->rsp);
+//  kprintf("Value in rsp p2 is %p\n", p2->rsp);
   __asm__ volatile(
   "\
       movq %0, %%rsp\
@@ -238,18 +374,18 @@ void p_set_process_name(pcb *process, char *name) {
 }
 
 void p_switch_to_user_mode(pcb *process) {
-  set_tss_rsp(process->kstack);
+  set_tss_rsp(&(process->kstack[127]));
   //These steps are referred from the James Molloy kernel development tutorials
   //Link: http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
   __asm__ volatile("  \
-		cli; \
+		//cli; \
 		movq $0x23, %%rax; \
 		movq %%rax, %%ds; \
 		movq %%rax, %%es; \
 		movq %%rax, %%fs; \
 		movq %%rax, %%gs; \
 								 \
-		movq %0, %%rax; \
+		//movq %0, %%rax; \
 		pushq $0x23; \
 		pushq %%rax; \
                  \
@@ -259,9 +395,9 @@ void p_switch_to_user_mode(pcb *process) {
 		push %%rax ; \
                  \
 		pushq $0x2B; \
-		pushq %1; \
-		iret; \
-		1: \
+		movq %1, %%rax; \
+    pushq %%rax; \
+		iretq; \
 		"
     :
     : "r" (process->rsp), "r"(process->rip)

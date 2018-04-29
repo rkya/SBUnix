@@ -29,28 +29,37 @@ char *getcwd(char *buf, size_t size) {
 }
 
 pid_t fork() {
-  //TODO: implement
   return (pid_t)0;
 }
 
 int execvpe(const char *file, char *const argv[], char *const envp[]) {
-  //TODO: implement
   return 0;
 }
 
 int execvp(const char *file, char *const argv[]) {
-  //TODO: implement
   return 0;
 }
 
 pid_t wait(int *status) {
-  //TODO: implement
-  return (pid_t)0;
+  return (pid_t) waitpid(-1, status);
 }
 
 int waitpid(int pid, int *status) {
-  //TODO: implement
-  return 0;
+  pcb *current_process = p_get_current_process();
+  current_process->wait_return_pid = (pid_t) pid;
+
+  if(p_has_child_processes(current_process)) {
+    current_process->state = WAITING;
+    yield();
+  }
+
+  if(current_process->wait_return_pid != -1 &&
+    active_queue[current_process->wait_return_pid] != NULL &&
+    status != NULL) {
+    *status = active_queue[current_process->wait_return_pid]->exit_status;
+  }
+
+  return (uint64_t) current_process->wait_return_pid;
 }
 
 unsigned int sleep(unsigned int seconds) {

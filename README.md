@@ -62,6 +62,7 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     cd <Path>
     e.g.
     cd /rootfs/etc/
+    cd /rootfs/
     ```
   * Echo
     ```
