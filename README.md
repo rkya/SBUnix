@@ -155,7 +155,10 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   * This is because when the sbush process is created, the function
   pointer of this function is given to the process as a starting point
   of execution.
-  * Moreover, all the executables that I have written can be
-  tested directly by commands like echo, sleep, cat, ls, kill and ps
-  as mentioned above as the contents of the binaries are directly
-  placed in their respective functions in my sbush.
+
+## Testing my binaries
+
+  * All the executables that I have written can be tested directly by
+  commands like echo, sleep, cat, ls, kill and ps as mentioned above as
+  the contents of the binaries are directly placed in their respective
+  functions in my sbush.
