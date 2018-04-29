@@ -81,12 +81,6 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     e.g.
     cat /rootfs/etc/test.txt
     ```
-  * Sleep for 's' seconds
-    ```
-    sleep <Time in seconds>
-    e.g.
-    sleep 5
-    ```
   * Add/change value of an environment variable
     ```
     export Name=Value
@@ -163,3 +157,13 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   commands like echo, sleep, cat, ls, kill and ps as mentioned above as
   the contents of the binaries are directly placed in their respective
   functions in my sbush.
+
+
+
+
+
+
+<!-- * Sleep for 's' seconds -->
+<!-- sleep <Time in seconds> -->
+<!-- e.g. -->
+<!-- sleep 5 -->
