@@ -124,7 +124,7 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     Value in rsp p1 is 0xffffffff80396200
     value in rsp p2 is 0xffffffff8026b590
     ```
-    Explaination:
+    <b>Explaination:</b>
   The p1 address is the rsp of the current running process and p2
   address is the rsp of the new process that the scheduler has picked
   to run. <br/>
