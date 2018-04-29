@@ -144,3 +144,18 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   I have currently set the preemptive switching frequency to 1 switch
   per second for the ease of testing. You can set it to the frequency
   of the timer interrupt of SBUnix i.e. 100 times per second.
+
+## Testing your sbush
+
+  * Since I wasn't able to load the binary, you cannot load your sbush
+  directly by placing it in ```/rootfs/bin/sbush```.
+  * You will need to copy all the contents of your sbush in
+  ```/sys/test_sbush.c``` and place all the contents of your main in
+  the ```test_sbush_main``` function.
+  * This is because when the sbush process is created, the function
+  pointer of this function is given to the process as a starting point
+  of execution.
+  * Moreover, all the executables that I have written can be
+  tested directly by commands like echo, sleep, cat, ls, kill and ps
+  as mentioned above as the contents of the binaries are directly
+  placed in their respective functions in my sbush.
