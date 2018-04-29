@@ -47,7 +47,7 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     target remote localhost:9999
     ```
 
-## Commands supported
+# Commands supported
 
   * Print the present working directory
     ```
