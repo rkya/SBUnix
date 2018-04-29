@@ -17,7 +17,8 @@ like echo, sleep, cat, ls, kill and ps.
   * Able to run my own sbush
 
     I wasn't able to switch to ring 3 to load binary. The code exists
-    but has some bugs in it.
+    but has some bugs in it. Therefore the SBUnix currently runs fine
+    in ring 0.
 
 # Running The OS
 
