@@ -1,5 +1,5 @@
 #include <signal.h>
-#include <sys/kprintf.h>
+#include <stdio.h>
 
 int kill(pid_t pid, int sig) {
   if(sig != SIGKILL || pid < 0) {
@@ -7,7 +7,7 @@ int kill(pid_t pid, int sig) {
   }
 
   if(pid == 1) {
-    kprintf("Do you really want to shut down the OS? [y/Y]\n");
+    printf("Do you really want to shut down the OS? [y/Y]\n");
     char answer = getchar();
     if(answer == 'y' || answer == 'Y') {
       shutdownOS();
@@ -40,7 +40,7 @@ void shutdownOS() {
     }
   }
 
-  kprintf("\nIt's now safe to turn off your computer.");
+  printf("\nIt's now safe to turn off your computer.");
 
   __asm__ volatile ("cli");
 

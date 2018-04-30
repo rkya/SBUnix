@@ -14,7 +14,7 @@ void s_syscall_handler(registers *regs)
 //      __asm__ volatile("movq %0, %%rax;"::"r"(val));
 //      return_value = 8;
       break;
-    case SYSCALL_GET_CHILDREN_INDEX:
+    case SYSCALL_T_GET_CHILDREN_INDEX:
       return_value = t_get_children_index((const char *)regs->rdi, (int *)regs->rsi, (int)regs->rdx);
 //      kprintf("Syscall value to be returned = %d.\n", return_value);
       break;

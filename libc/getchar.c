@@ -2,5 +2,7 @@
 #include <sys/terminal.h>
 
 char getchar() {
-  return t_read_char_from_screen();
+  char buffer[2048];
+  gets(buffer);
+  return buffer[0];
 }

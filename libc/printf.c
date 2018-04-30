@@ -144,7 +144,57 @@ int printf(const char *format, ...) {
   printf_buffer_index = 0;
   while (1) {
     printf_buffer[0] = '\0';
-    const char *ptr = format_string(format);
+    const char *ptr = NULL;
+
+    va_list parameters;
+    va_start(parameters, format);
+
+    printf_buffer_index = 0;
+    int num = 0;
+    uint64_t pointer = 0;
+    while(*format != 0 && printf_buffer_index < KPRINTF_BUFFER_SIZE - 1) {
+      if(*format == '%') {
+        format++;
+        switch(*format) {
+          case 's':;
+            char *str = va_arg(parameters, char *);
+            while(*str != 0 && *str != '\0') {
+              printf_buffer[printf_buffer_index++] = *str;
+              str++;
+            }
+            break;
+          case 'c':;
+            char ch = va_arg(parameters, int);
+            printf_buffer[printf_buffer_index++] = ch;
+            break;
+          case 'd':;
+            num = va_arg(parameters, int);
+            printf_buffer_index += printf_printInt(printf_buffer_index, num);
+            break;
+          case 'x':;
+            num = va_arg(parameters, int);
+            printf_buffer_index += printf_printHex(printf_buffer_index, num);
+            break;
+          case 'p':;
+            printf_buffer[printf_buffer_index++] = '0';
+            printf_buffer[printf_buffer_index++] = 'x';
+            pointer = (uint64_t)va_arg(parameters, void *);
+            printf_buffer_index += printf_printPointer(printf_buffer_index, pointer);
+            break;
+        }
+        format++;
+      } else {
+        printf_buffer[printf_buffer_index++] = *format;
+        format++;
+      }
+    }
+    printf_buffer[printf_buffer_index] = '\0';
+
+    va_end(parameters);
+
+    if(printf_buffer_index >= KPRINTF_BUFFER_SIZE - 1 && *format != 0) {
+      ptr = format;
+    }
 
     int val;
     __asm__ __volatile__ (

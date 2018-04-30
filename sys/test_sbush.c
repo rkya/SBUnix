@@ -68,7 +68,7 @@ void sbush_pwd_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
   //kprintf("inside pwd\n");
   char cwd[256];
   if(getcwd(cwd, sizeof(cwd))) {
-    kprintf("%s\n", cwd);
+    printf("%s\n", cwd);
   } else {
     fprintf(stderr, "sbush:error:invalid directory \n");
   }
@@ -76,7 +76,7 @@ void sbush_pwd_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
 
 void sbush_kill_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
   if(sbush_cmd_tokens[1][0] == '\0') {
-    kprintf("Usage: kill pid\n");
+    printf("Usage: kill pid\n");
     return;
   }
 
@@ -84,9 +84,9 @@ void sbush_kill_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX
   int sig = stoi(sbush_cmd_tokens[1]);
   int ret_val = kill(pid, sig);
   if(ret_val == 0) {
-    kprintf("Process with pid %d killed.\n", pid);
+    printf("Process with pid %d killed.\n", pid);
   } else {
-    kprintf("Could not kill process with pid %d.\n", pid);
+    printf("Could not kill process with pid %d.\n", pid);
   }
 }
 
@@ -118,10 +118,10 @@ void sbush_ls_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_L
   struct dirent *current_dirent;
 
   if(ls_directory == NULL) {
-    kprintf("opendir() returned NULL\n");
+    printf("opendir() returned NULL\n");
   } else {
     while((current_dirent = readdir(ls_directory)) != NULL) {
-      kprintf("%s\n", current_dirent->d_name);
+      printf("%s\n", current_dirent->d_name);
     }
     closedir(ls_directory);
   }
@@ -147,7 +147,7 @@ void sbush_echo_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX
         buffer[k++] = sbush_cmd_tokens[i][j++];
       }
       buffer[k] = '\0';
-      kprintf("%s ", buffer);
+      printf("%s ", buffer);
       i++;
       j = 0;
       k = 0;
@@ -155,20 +155,20 @@ void sbush_echo_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX
 
     int length = strlen(sbush_cmd_tokens[1]);
     if(length == 1) {
-      kprintf("\n");
+      printf("\n");
     } else {
       sbush_cmd_tokens[1][length - 1] = '\0';
-      kprintf("%s\n", &sbush_cmd_tokens[1][1]);
+      printf("%s\n", &sbush_cmd_tokens[1][1]);
     }
   } else {
     if(sbush_cmd_tokens[1][0] == '$' && sbush_cmd_tokens[1][1] != '\0') {
       char *env_value = getenv(&sbush_cmd_tokens[1][1]);
       if(env_value != NULL) {
-        kprintf("%s", env_value);
+        printf("%s", env_value);
       }
-      kprintf("\n");
+      printf("\n");
     } else {
-      kprintf("%s\n", sbush_cmd_tokens[1]);
+      printf("%s\n", sbush_cmd_tokens[1]);
     }
   }
 }
@@ -193,13 +193,13 @@ void sbush_cat_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
   char buffer[128];
   if(fd > -1) {
     while(read(fd, buffer, sizeof(buffer)) > 0) {
-      kprintf("%s", buffer);
+      printf("%s", buffer);
     }
     close(fd);
   } else {
-    kprintf("Could not open file: %s", sbush_cmd_tokens[1]);
+    printf("Could not open file: %s", sbush_cmd_tokens[1]);
   }
-  kprintf("\n");
+  printf("\n");
 
   /*FILE *fp;
   char c;
@@ -410,7 +410,7 @@ void sbush_execute_cmd(char *sbush_cmd) {
     : "cc", "rcx", "r11", "memory"
     );*/
   } else {
-    kprintf("%s: command not found\n", sbush_cmd_tokens[0]);
+    printf("%s: command not found\n", sbush_cmd_tokens[0]);
     pid = fork();
     if(pid == 0){
       //const char *file, char *const argv[]
@@ -500,7 +500,7 @@ int test_sbush_main() {
     if(getcwd(current_working_directory, sizeof(current_working_directory)) == NULL) {
       current_working_directory[0] = '\0';
     }
-    kprintf("%s%s%s", "sbush:", current_working_directory, "$ ");
+    printf("%s%s%s", "sbush:", current_working_directory, "$ ");
 
     /*char *ch = (char *) malloc(sizeof(char) * 2);
     ch[0] = 'j';

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <sys/kprintf.h>
+#include <stdio.h>
 
 static char var_name[MAX_ENV_VARIABLES][MAX_ENV_VARIABLES_SIZE];
 static char var_value[MAX_ENV_VARIABLES][MAX_ENV_VARIABLES_SIZE];
@@ -39,7 +39,7 @@ char * getenv(char *name) {
 
 void e_print_all_variables() {
   for(int i = 0; i < var_count; i++) {
-    kprintf("%s=%s\n", var_name[i], var_value[i]);
+    printf("%s=%s\n", var_name[i], var_value[i]);
   }
 }
 

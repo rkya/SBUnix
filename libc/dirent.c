@@ -17,7 +17,7 @@ DIR *opendir(char *name) {
   __asm__ __volatile__ (
   "int $0x80;"
   : "=a" (val)
-  : "0"(SYSCALL_GET_CHILDREN_INDEX), "D"(name), "S"(cache_directory.vfs_indexes), "d"(MAX_VFS_INDEXES)
+  : "0"(SYSCALL_T_GET_CHILDREN_INDEX), "D"(name), "S"(cache_directory.vfs_indexes), "d"(MAX_VFS_INDEXES)
   : "cc", "rcx", "r11", "memory"
   );
   cache_directory.vfs_indexes_size = return_value;
