@@ -1,5 +1,6 @@
 #include <sys/process.h>
 #include <sys/kprintf.h>
+#include "../include/sys/process.h"
 //#include <main_function.h>
 //#include <test_sbush.h>
 
@@ -76,6 +77,10 @@ int add_to_active_queue(pcb *new_pcb) {
   return 1;
 }
 
+/***
+ * Schedule the next active process in the queue. This scheduler considers every process of the same priority and
+ * schedules the processes in a round-robin fashion.
+ */
 void schedule() {
   //int count = MAX_PROCESSES;
   int next_process = -1;
@@ -271,6 +276,15 @@ pcb *p_get_new_process(char *filename) {
   new_pcb->fd_array[0].live = 1;
   new_pcb->fd_array[1].live = 1;
   new_pcb->fd_array[2].live = 1;
+  new_pcb->fd_array[0].index = 0;
+  new_pcb->fd_array[1].index = 1;
+  new_pcb->fd_array[2].index = 2;
+  new_pcb->fd_array[0].buffer[0] = '\0';
+  new_pcb->fd_array[1].buffer[0] = '\0';
+  new_pcb->fd_array[2].buffer[0] = '\0';
+  new_pcb->fd_array[0].position = 0;
+  new_pcb->fd_array[1].position = 0;
+  new_pcb->fd_array[2].position = 0;
   new_pcb->fd_array_size = 3;
 
   return new_pcb;
@@ -278,6 +292,10 @@ pcb *p_get_new_process(char *filename) {
 
 pcb *p_get_current_process() {
   return active_queue[current_process];
+}
+
+pcb *p_get_process_by_id(int pid) {
+  return active_queue[pid];
 }
 
 pcb *p_get_parent_process(pcb *process) {

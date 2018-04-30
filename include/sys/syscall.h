@@ -7,6 +7,7 @@
 //#include <sys/isr.h>
 
 #define SYSCALL_FORMATTED_KPRINTF 1
+#define SYSCALL_GET_CHILDREN_INDEX 2
 
 uint64_t return_value;
 

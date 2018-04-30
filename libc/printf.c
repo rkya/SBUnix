@@ -140,13 +140,13 @@ int printf(const char *format, ...) {
   char ds[3];
   strcpy(ds, arr);*/
 
-  int val;
   int multiplier = 0;
   printf_buffer_index = 0;
   while (1) {
     printf_buffer[0] = '\0';
     const char *ptr = format_string(format);
 
+    int val;
     __asm__ __volatile__ (
     "int $0x80;"
     : "=a" (val)
@@ -162,6 +162,5 @@ int printf(const char *format, ...) {
   }
 
   return_value = multiplier * KPRINTF_BUFFER_SIZE + printf_buffer_index;
-  val = return_value;
-  return val;
+  return (int)return_value;
 }

@@ -8,6 +8,7 @@
 #include <sys/paging.h>
 #include <sys/process.h>
 #include <sys/timer.h>
+#include <file.h>
 #include <environment.h>
 
 #define INITIAL_STACK_SIZE 4096
@@ -92,6 +93,7 @@ void start(uint32_t *modulep, void *physbase, void *physfree)
   /*kprintf("active_queue_size = %d, current_process = %d, pid_allocator_index = %d.\n",
           active_queue_size, current_process, pid_allocator_index);*/
 
+  f_init_file();
 
   /*pcb *p3 = p_get_new_process("p3");
   kprintf("Created a new process: %s.\n", p3->name);

@@ -1,4 +1,5 @@
 #include <sys/syscall.h>
+#include <sys/tarfs.h>
 
 void s_syscall_handler(registers *regs)
 {
@@ -9,9 +10,13 @@ void s_syscall_handler(registers *regs)
     case SYSCALL_FORMATTED_KPRINTF:
       kprintf_formatted((const char *) regs->rdi);
       //kprintf("Proper syscall is getting called.\n");
-      uint64_t val = 7;
-      __asm__ volatile("movq %0, %%rax;"::"r"(val));
-      return_value = 8;
+//      uint64_t val = 7;
+//      __asm__ volatile("movq %0, %%rax;"::"r"(val));
+//      return_value = 8;
+      break;
+    case SYSCALL_GET_CHILDREN_INDEX:
+      return_value = t_get_children_index((const char *)regs->rdi, (int *)regs->rsi, (int)regs->rdx);
+//      kprintf("Syscall value to be returned = %d.\n", return_value);
       break;
   }
 }

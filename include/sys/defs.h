@@ -26,6 +26,6 @@ typedef uint64_t pdp;
 typedef uint64_t pd;
 typedef uint64_t pt;
 
-typedef uint64_t FILE;
+//typedef uint64_t FILE;
 
 #endif

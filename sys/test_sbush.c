@@ -17,8 +17,8 @@
 #define COMMAND_MAX_LENGTH 128
 #define COMMAND_MAX_ARGUMENTS 128
 
-static FILE *stderr = NULL;
-static FILE *stdin = NULL;
+//static FILE *stderr = NULL;
+//static FILE *stdin = NULL;
 
 //extern char environment_variables[MAX_ENV_VARIABLES][MAX_ENV_VARIABLES_SIZE];
 //extern int environment_variables_size;
@@ -80,8 +80,9 @@ void sbush_kill_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX
     return;
   }
 
-  int pid = (pid_t)stoi(sbush_cmd_tokens[1]);
-  int ret_val = kill(pid, SIGKILL);
+  int pid = (pid_t)stoi(sbush_cmd_tokens[2]);
+  int sig = stoi(sbush_cmd_tokens[1]);
+  int ret_val = kill(pid, sig);
   if(ret_val == 0) {
     kprintf("Process with pid %d killed.\n", pid);
   } else {
@@ -200,7 +201,46 @@ void sbush_cat_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_
   }
   kprintf("\n");
 
+  /*FILE *fp;
+  char c;
 
+  fp = fopen(sbush_cmd_tokens[1],"r");
+
+  if(fp != NULL) {
+//    while(1) {
+      c = getc(fp);
+//      if( feof(fp) ) {
+//        break ;
+//      }
+      printf("%c", c);
+//    }
+    fclose(fp);
+  } else {
+    kprintf("Could not open file: %s", sbush_cmd_tokens[1]);
+  }
+  kprintf("\n");*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /*while(1) {
+    c = getc(fp);
+    if( feof(fp) ) {
+      break ;
+    }
+    printf("%c", c);
+  }
+  fclose(fp);*/
 
 }
 
@@ -358,6 +398,10 @@ void sbush_execute_cmd(char *sbush_cmd) {
     int ans = printf("Testing syscall from printf.\n");
     ans = printf("returned value = %d.\n", ans);
     printf("returned value = %d.\n", return_value);
+    ans = printf("s");
+    printf("returned value = %d.\n", ans);
+    ans = printf("");
+    printf("returned value = %d.\n", ans);
     /*int val;
     __asm__ __volatile__ (
     "int $0x80;"
