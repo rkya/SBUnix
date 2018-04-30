@@ -126,7 +126,7 @@ void print_new_line(volatile char ** video) {
  * @param fmt text to be printed
  * @param ... optional parameters
  */
-void t_write_to_screen(const char *fmt, ...) {
+void t_old_write_to_screen(const char *fmt, ...) {
   va_list parameters;
   va_start(parameters, fmt);
 
@@ -217,6 +217,46 @@ void t_write_to_screen(const char *fmt, ...) {
   outb(0x3D5, (((videoCardPosition - videoCardStart) / 2) >> 8) & 0xFF);
 
   va_end(parameters);
+}
+
+/***
+ * Write the text to the screen.
+ * @param fmt text to be printed
+ * @param ... optional parameters
+ */
+void t_write_to_screen(const char *fmt) {
+  int colour = 0x00;
+  volatile char *video = videoCardPosition;
+  while(*fmt != 0) {
+    if(scrollForNextCall) {
+      scroll();
+      video -= 160;
+      videoCardPosition -= 160;
+      scrollForNextCall = 0;
+    }
+    if(*fmt == '\n') {
+      print_new_line(&video);
+      fmt++;
+    } else {
+      *video++ = *fmt++;
+      *video++ = colour;
+    }
+    if(video >= videoCardEnd) {
+      scrollForNextCall = 1;
+    }
+  }
+
+  videoCardPosition = video;
+  if(videoCardPosition >= videoCardEnd) {
+    scrollForNextCall = 1;
+  }
+
+  //set cursor position
+  outb(0x3D4, 0x0F);
+  outb(0x3D5, ((videoCardPosition - videoCardStart) / 2) & 0xFF);
+  outb(0x3D4, 0x0E);
+  outb(0x3D5, (((videoCardPosition - videoCardStart) / 2) >> 8) & 0xFF);
+
 }
 
 /***
@@ -338,7 +378,7 @@ void t_add_to_buffer(char ch) {
     //WAIT_FOR_USER_INPUT++;
   }
   WAIT_FOR_USER_INPUT++;
-  t_write_to_screen("%c", ch);
+  t_old_write_to_screen("%c", ch);
 }
 
 /***

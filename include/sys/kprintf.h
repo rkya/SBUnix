@@ -6,6 +6,7 @@
 #include <sys/terminal.h>
 
 void kprintf(const char *fmt, ...);
+void kprintf_formatted(const char *fmt);
 //void initScreen();
 //void scroll();
 //void setNewVideoCardAddresses();
