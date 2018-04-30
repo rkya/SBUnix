@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sys/process.h>
 
-#define SIGKILL 9
+#define SIGKILL -9
 
 int kill(pid_t pid, int sig);
 void shutdownOS();

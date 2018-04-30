@@ -93,9 +93,9 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     ```
   * Kill a process
     ```
-    kill <pid>
+    kill -9 <pid>
     e.g.
-    kill 1
+    kill -9 1
     ```
     If you kill a process with pid > 1, the process will be killed.<br/>
     But if you try to kill process with pid 1, SBUnix will ask you if
