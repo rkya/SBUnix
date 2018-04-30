@@ -1,10 +1,24 @@
 #include <stdio.h>
 #include <sys/tarfs.h>
 #include <sys/process.h>
+#include <sys/syscall.h>
 
 
 void f_init_file() {
-  pcb *sbush_process = p_get_process_by_id(1);
+//  pcb *sbush_process = p_get_process_by_id(1);
+//  printf("sbush_process address direct call = %p\n", sbush_process);
+
+  int pid = 1;
+  int val;
+  __asm__ __volatile__ (
+  "int $0x80;"
+  : "=a" (val)
+  : "0"(SYSCALL_P_GET_PROCESS_BY_ID), "D"(pid)
+  : "cc", "rcx", "r11", "memory"
+  );
+  pcb *sbush_process = (pcb *)return_value;
+//  printf("sbush_process address syscall = %p\n", sbush_process);
+
   stdin = &(sbush_process->fd_array[0]);
   stdout = &(sbush_process->fd_array[1]);
   stderr = &(sbush_process->fd_array[2]);
@@ -12,7 +26,19 @@ void f_init_file() {
 
 int open(char *pathname, int flags) {
   //check if the file is present in vfs
-  int vfs_index = t_tarfs_get_index(pathname);
+//  int vfs_index = t_tarfs_get_index(pathname);
+//  printf("vfs index direct call = %d\n", vfs_index);
+
+  int val;
+  __asm__ __volatile__ (
+  "int $0x80;"
+  : "=a" (val)
+  : "0"(SYSCALL_T_TARFS_GET_INDEX), "D"(pathname)
+  : "cc", "rcx", "r11", "memory"
+  );
+  int vfs_index = return_value;
+//  printf("vfs index syscall = %d\n", vfs_index);
+
   if(vfs_index == -1) {
     return -1;
   }
@@ -23,7 +49,18 @@ int open(char *pathname, int flags) {
   }
 
   //create a new file descriptor
-  pcb *current_process = p_get_current_process();
+//  pcb *current_process = p_get_current_process();
+//  printf("currentprocess addr = %p\n", current_process);
+  val = 0;
+  __asm__ __volatile__ (
+  "int $0x80;"
+  : "=a" (val)
+  : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+  : "cc", "rcx", "r11", "memory"
+  );
+  pcb *current_process = (pcb *)return_value2;
+//  printf("currentprocess addr via syscall = %p,%p\n", return_value, return_value2);
+
   if(current_process->fd_array_size >= MAX_FILE_DESCRIPTORS) {
     return -1;
   }
@@ -40,7 +77,15 @@ int open(char *pathname, int flags) {
 }
 
 int close(int fd) {
-  pcb *current_process = p_get_current_process();
+//  pcb *current_process = p_get_current_process();
+  int val = 0;
+  __asm__ __volatile__ (
+  "int $0x80;"
+  : "=a" (val)
+  : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+  : "cc", "rcx", "r11", "memory"
+  );
+  pcb *current_process = (pcb *)return_value2;
 
   if(fd >= current_process->fd_array_size) {
     return 0;
@@ -58,7 +103,15 @@ ssize_t read(int fd, void *buf, size_t count) {
   if(fd > 2) {
     return t_read(fd, (char *)buf, count);
   } else if(fd == 0) {
-    pcb *current_process = p_get_current_process();
+//    pcb *current_process = p_get_current_process();
+    int val = 0;
+    __asm__ __volatile__ (
+    "int $0x80;"
+    : "=a" (val)
+    : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+    : "cc", "rcx", "r11", "memory"
+    );
+    pcb *current_process = (pcb *)return_value2;
 
     char *buffer = buf;
     int i;
@@ -111,7 +164,16 @@ FILE *fopen(char *file_name, const char *mode) {
     return NULL;
   }
 
-  pcb *current_process = p_get_current_process();
+//  pcb *current_process = p_get_current_process();
+  int val = 0;
+  __asm__ __volatile__ (
+  "int $0x80;"
+  : "=a" (val)
+  : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+  : "cc", "rcx", "r11", "memory"
+  );
+  pcb *current_process = (pcb *)return_value2;
+
   return &(current_process->fd_array[open_ret_value]);
 }
 
@@ -134,7 +196,16 @@ int feof(FILE *file_ptr) {
   int fd = file_ptr->index;
   if(fd > 2) {
     //get current process
-    pcb *current_process = p_get_current_process();
+//    pcb *current_process = p_get_current_process();
+    int val = 0;
+    __asm__ __volatile__ (
+    "int $0x80;"
+    : "=a" (val)
+    : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+    : "cc", "rcx", "r11", "memory"
+    );
+    pcb *current_process = (pcb *)return_value;
+
     //check if the file descriptor is present
     if(fd >= current_process->fd_array_size || !current_process->fd_array[fd].live) {
       return 1;
@@ -151,7 +222,15 @@ int feof(FILE *file_ptr) {
     return 0;
 
   } else if(fd == 0) {
-    pcb *current_process = p_get_current_process();
+//    pcb *current_process = p_get_current_process();
+    int val = 0;
+    __asm__ __volatile__ (
+    "int $0x80;"
+    : "=a" (val)
+    : "0"(SYSCALL_P_GET_CURRENT_PROCESS)
+    : "cc", "rcx", "r11", "memory"
+    );
+    pcb *current_process = (pcb *)return_value2;
 
     if(current_process->fd_array[fd].buffer[0] == '\0' ||
        strlen(current_process->fd_array[fd].buffer) != 0) {

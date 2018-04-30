@@ -21,6 +21,7 @@
 
 
 uint64_t return_value;
+uint64_t return_value2;
 
 void s_syscall_handler(registers *);
 
