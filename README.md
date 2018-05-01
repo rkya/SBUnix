@@ -91,6 +91,12 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     ```
     echo $hello
     ```
+  * Sleep for 's' seconds
+    ```
+    sleep <Time in seconds>
+    e.g.
+    sleep 5
+    ```
   * Kill a process
     ```
     kill -9 <pid>
@@ -157,13 +163,3 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   commands like echo, sleep, cat, ls, kill and ps as mentioned above as
   the contents of the binaries are directly placed in their respective
   functions in my sbush.
-
-
-
-
-
-
-<!-- * Sleep for 's' seconds -->
-<!-- sleep <Time in seconds> -->
-<!-- e.g. -->
-<!-- sleep 5 -->

@@ -385,9 +385,9 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_cat_command(sbush_cmd_tokens);
   }/* else if(!strcmp(sbush_cmd_tokens[0], "clear")) {
     sbush_clear_command(sbush_cmd_tokens);
-  }*/ /*else if(!strcmp(sbush_cmd_tokens[0], "sleep")) {
+  }*/ else if(!strcmp(sbush_cmd_tokens[0], "sleep")) {
     sbush_sleep_command(sbush_cmd_tokens);
-  }*/ else if(!strcmp(sbush_cmd_tokens[0], "export")) {
+  } else if(!strcmp(sbush_cmd_tokens[0], "export")) {
     sbush_export_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "kill")) {
     sbush_kill_command(sbush_cmd_tokens);
@@ -513,7 +513,7 @@ int test_sbush_main() {
     ch[1] = '\0';
     printf("%s\n", ch);
     free(ch);*/
-    
+
     sbush_cmd = sbush_get_cmd();
     sbush_execute_cmd(sbush_cmd);
 

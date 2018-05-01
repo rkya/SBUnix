@@ -63,14 +63,19 @@ int waitpid(int pid, int *status) {
 }
 
 unsigned int sleep(unsigned int seconds) {
-  pcb *current_process = p_get_current_process();
+  /*pcb *current_process = p_get_current_process();
   current_process->remaining_sleep_time = seconds;
-  current_process->state = SLEEPING;
+  current_process->state = SLEEPING;*/
 
+  while (seconds > 10) {
+    for (uint64_t i = 0; i < 2395882353/*2500000000*/; i++);
+    seconds -= 10;
+  }
+  for (uint64_t i = 0; i < /*235588235*/350000000 * seconds; i++);
   /*while (current_process->remaining_sleep_time > 0) {
     yield();
   }*/
-  yield();
+//  yield();
 
   return 0;
 }
