@@ -507,7 +507,13 @@ int test_sbush_main() {
     /*char *ch = (char *) malloc(sizeof(char) * 2);
     ch[0] = 'j';
     ch[1] = '\0';
-    kprintf("%s\n", ch);*/
+    printf("%s\n", ch);
+    ch = (char *) realloc(ch, sizeof(char) * 3);
+    ch[0] = 'r';
+    ch[1] = '\0';
+    printf("%s\n", ch);
+    free(ch);*/
+    
     sbush_cmd = sbush_get_cmd();
     sbush_execute_cmd(sbush_cmd);
 

@@ -41,6 +41,14 @@ void s_syscall_handler(registers *regs)
       return_value = p_remove_process_by_id((pid_t) regs->rdi);
       return_value2 = return_value;
       break;
+    case SYSCALL_KMALLOC:
+      return_value = (uint64_t) kmalloc((size_t) regs->rdi);
+      return_value2 = return_value;
+      break;
+    case SYSCALL_P_GET_PARENT_PROCESS:
+      return_value = (uint64_t) p_get_parent_process((pcb *) regs->rdi);
+      return_value2 = return_value;
+      break;
     default:
       return_value = -1;
       break;
