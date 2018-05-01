@@ -397,11 +397,13 @@ void sbush_execute_cmd(char *sbush_cmd) {
     //p_switch_to_user_mode();
     int ans = printf("Testing syscall from printf.\n");
     ans = printf("returned value = %d.\n", ans);
-    printf("returned value = %d.\n", return_value);
+    printf("integer = %d.\n", 0);
     ans = printf("s");
-    printf("returned value = %d.\n", ans);
+    printf("char value = %c.\n", '0');
     ans = printf("");
-    printf("returned value = %d.\n", ans);
+    printf("integer value = %d.\n", 10);
+    printf("hex value = %x.\n", 0);
+    printf("pointer value = %p.\n", 0);
     /*int val;
     __asm__ __volatile__ (
     "int $0x80;"

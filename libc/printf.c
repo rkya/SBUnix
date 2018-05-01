@@ -80,7 +80,7 @@ int printf_printInt(int index, int num) {
 }
 
 
-const char *format_string(const char *fmt, ...) {
+/*const char *format_string(const char *fmt, ...) {
   va_list parameters;
   va_start(parameters, fmt);
 
@@ -104,7 +104,11 @@ const char *format_string(const char *fmt, ...) {
           break;
         case 'd':;
           num = va_arg(parameters, int);
-          printf_buffer_index += printf_printInt(printf_buffer_index, num);
+          if(num == 0) {
+            printf_buffer[printf_buffer_index++] = '0';
+          } else {
+            printf_buffer_index += printf_printInt(printf_buffer_index, num);
+          }
           break;
         case 'x':;
           num = va_arg(parameters, int);
@@ -131,7 +135,7 @@ const char *format_string(const char *fmt, ...) {
     return fmt;
   }
   return NULL;
-}
+}*/
 
 
 int printf(const char *format, ...) {
@@ -169,17 +173,29 @@ int printf(const char *format, ...) {
             break;
           case 'd':;
             num = va_arg(parameters, int);
-            printf_buffer_index += printf_printInt(printf_buffer_index, num);
+            if(num == 0) {
+              printf_buffer[printf_buffer_index++] = '0';
+            } else {
+              printf_buffer_index += printf_printInt(printf_buffer_index, num);
+            }
             break;
           case 'x':;
             num = va_arg(parameters, int);
-            printf_buffer_index += printf_printHex(printf_buffer_index, num);
+            if(num == 0) {
+              printf_buffer[printf_buffer_index++] = '0';
+            } else {
+              printf_buffer_index += printf_printHex(printf_buffer_index, num);
+            }
             break;
           case 'p':;
             printf_buffer[printf_buffer_index++] = '0';
             printf_buffer[printf_buffer_index++] = 'x';
             pointer = (uint64_t)va_arg(parameters, void *);
-            printf_buffer_index += printf_printPointer(printf_buffer_index, pointer);
+            if(pointer == 0) {
+              printf_buffer[printf_buffer_index++] = '0';
+            } else {
+              printf_buffer_index += printf_printPointer(printf_buffer_index, pointer);
+            }
             break;
         }
         format++;

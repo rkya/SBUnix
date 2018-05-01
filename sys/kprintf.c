@@ -285,17 +285,29 @@ const char *kprintf_format_string(const char *fmt, ...) {
           break;
         case 'd':;
           num = va_arg(parameters, int);
-          kprintf_buffer_index += kprintf_printInt(kprintf_buffer_index, num);
+          if(num == 0) {
+            kprintf_buffer[kprintf_buffer_index++] = '0';
+          } else {
+            kprintf_buffer_index += kprintf_printInt(kprintf_buffer_index, num);
+          }
           break;
         case 'x':;
           num = va_arg(parameters, int);
-          kprintf_buffer_index += kprintf_printHex(kprintf_buffer_index, num);
+          if(num == 0) {
+            kprintf_buffer[kprintf_buffer_index++] = '0';
+          } else {
+            kprintf_buffer_index += kprintf_printHex(kprintf_buffer_index, num);
+          }
           break;
         case 'p':;
           kprintf_buffer[kprintf_buffer_index++] = '0';
           kprintf_buffer[kprintf_buffer_index++] = 'x';
           pointer = (uint64_t)va_arg(parameters, void *);
-          kprintf_buffer_index += kprintf_printPointer(kprintf_buffer_index, pointer);
+          if(pointer == 0) {
+            kprintf_buffer[kprintf_buffer_index++] = '0';
+          } else {
+            kprintf_buffer_index += kprintf_printPointer(kprintf_buffer_index, pointer);
+          }
           break;
       }
       fmt++;
