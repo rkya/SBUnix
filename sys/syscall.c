@@ -1,6 +1,7 @@
 #include <sys/syscall.h>
 #include <sys/tarfs.h>
 #include <sys/process.h>
+#include <sys/terminal.h>
 
 void s_syscall_handler(registers *regs)
 {
@@ -31,7 +32,15 @@ void s_syscall_handler(registers *regs)
     case SYSCALL_P_GET_CURRENT_PROCESS:
       return_value = (uint64_t ) p_get_current_process();
       return_value2 = return_value;
-//      kprintf("return val = %p\n", return_value2);
+      break;
+    case SYSCALL_T_READ_LINE_FROM_SCREEN:
+      return_value = (uint64_t) t_read_line_from_screen();
+      return_value2 = return_value;
+      break;
+    case SYSCALL_P_REMOVE_PROCESS_BY_ID:
+      return_value = p_remove_process_by_id((pid_t) regs->rdi);
+      return_value2 = return_value;
+      break;
     default:
       return_value = -1;
       break;
