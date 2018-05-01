@@ -5,7 +5,10 @@ developed as a part of operating systems course in Stony Brook
 University.
 I have implemented paging, free list, kmalloc, interrupts, scheduling,
 context switching, terminal and syscalls. SBUnix also contains binaries
-like echo, sleep, cat, ls, kill and ps.
+like echo, sleep, cat, ls, kill and ps. Note that the binaries are not
+present in the standard path of ```/bin``` but they are present as
+functions in the ```/sys/test_sbush.c``` file. This is because I was
+unable to load binaries from the ELF.
 
 # Functionalities Completed
 
@@ -64,6 +67,9 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     cd /rootfs/etc/
     cd /rootfs/
     ```
+    Note that you have to enter absolute path right from ```/rootfs/```.
+    Also, note that every directory ends with a '/'. So if you enter
+    ```cd /rootfs``` instead of ```cd /rootfs/```, it won't work.
   * Echo
     ```
     echo <Word/Variable>
@@ -163,3 +169,12 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   commands like echo, sleep, cat, ls, kill and ps as mentioned above as
   the contents of the binaries are directly placed in their respective
   functions in my sbush.
+
+# Additional points to note
+
+  * The code for sbush is written in the ```/sys/test_sbush.c``` file
+  and not in the standard ```/bin/sbush``` directory.
+  * Since I was unable to load binaries from ELF, do not add executables
+  or files in the ```/bin``` directory as the SBUnix may crash.
+  * The tarfs is set to load files only in the ```/bin``` and ```/etc```
+  folders. Files from any other folders may not load.
