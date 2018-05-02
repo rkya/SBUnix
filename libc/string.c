@@ -54,33 +54,6 @@ int strcmp(const char *str1, const char *str2) {
 	//return str1[i] > str2[i];
 }
 
-/*int strsubcmp(char *str1, char *str2, int from, int to) {
-	int i = 0;
-	int j = from;
-	int len1 = strlen(str1);
-	//int len2 = strlen(str2);
-	int len2 = to - from;
-	if(len1 > len2) {
-		return 1;
-	} else if(len1 < len2) {
-		return -1;
-	}
-	while(str1[i] != '\0' && str1[i] == str2[j] && j < to) {
-		i++;
-		j++;
-	}
-	if(str1[i] == '\0') {
-		return 0;
-	}
-	if(str1[i] > str2[j]) {
-	  return 1;
-	}
-	else {
-	  return -1;
-	}
-	//return str1[i] > str2[i];
-}*/
-
 /***
  * Copy the second string to the first string
  * @param str1 where content is to be copied

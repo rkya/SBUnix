@@ -53,5 +53,6 @@ int closedir(DIR *dirp) {
   /*if(dirp != NULL) {
     free(dirp);
   }*/
+  //since the cache_directory is not dynamically allocated, nothing needs to be done.
   return 1;
 }

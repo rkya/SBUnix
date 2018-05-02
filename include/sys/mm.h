@@ -6,11 +6,6 @@
 #define VMA_TYPE_GENERAL 1
 #define VMA_TYPE_TEXT 2
 #define VMA_TYPE_DATA 3
-#define PFLAG_READ 0X4
-#define PFLAG_WRITE 0X2
-#define PFLAG_EXECUTE 0X1
-#define PFLAG_READ_EXECUTE ((PFLAG_READ) | (PFLAG_EXECUTE))
-#define PFLAG_READ_WRITE ((PFLAG_READ) | (PFLAG_WRITE))
 
 /*
 	Structure refereneces:

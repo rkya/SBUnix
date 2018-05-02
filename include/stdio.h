@@ -5,9 +5,6 @@
 #include <file.h>
 
 static const int EOF = -1;
-//static FILE *stderr = NULL;
-//static FILE *stdin = NULL;
-//static FILE *stdout = NULL;
 
 int putchar(int c);
 int puts(const char *s);

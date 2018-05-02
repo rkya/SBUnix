@@ -40,16 +40,4 @@ void t_timer_interrupt_action() {
     //The scheduler decides which process should continue execution next
     schedule();
   }
-
-  /*if(adjustment >= 1000) {
-    adjustment = 0;
-    schedule();
-  }*/
-
-  pcb *current_process = p_get_current_process();
-  if(current_process != NULL && current_process->pid == 0) {
-    //t_timer_interrupt_action();
-    //kprintf("Current pid = %d\n", current_process->pid);
-    //yield();
-  }
 }

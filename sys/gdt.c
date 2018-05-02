@@ -95,25 +95,3 @@ void g_init_gdt() {
 void set_tss_rsp(void *rsp) {
   tss.rsp0 = rsp;
 }
-
-/*void write_tss(int64_t num, uint32_t reserved_0, uint64_t rsp0) {
-  //uint64_t base = (uint64_t) &tss;
-  //uint64_t limit = base + sizeof(tss);
-
-  //gdt_set_gate(num, base, limit, 0xE9, 0x00);
-
-  // Ensure the descriptor is initially zero.
-  memset(&tss, 0, sizeof(tss));
-
-  tss.reserved_0  = reserved_0;  // Set the kernel stack segment.
-  tss.rsp0 = (void *)rsp0; // Set the kernel stack pointer.
-
-  // Here we set the cs, ss, ds, es, fs and gs entries in the TSS. These specify what
-  // segments should be loaded when the processor switches to kernel mode. Therefore
-  // they are just our normal kernel code/data segments - 0x08 and 0x10 respectively,
-  // but with the last two bits set, making 0x0b and 0x13. The setting of these bits
-  // sets the RPL (requested privilege level) to 3, meaning that this TSS can be used
-  // to switch to kernel mode from ring 3.
-  //tss_entry.cs   = 0x0b;
-  //tss_entry.ss = tss_entry.ds = tss_entry.es = tss_entry.fs = tss_entry.gs = 0x13;
-}*/

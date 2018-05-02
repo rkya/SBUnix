@@ -1,7 +1,5 @@
 #include <sys/kprintf.h>
 #include <sys/io.h>
-#include <sys/util.h>
-//#include <sys/process.h>
 
 #define kernbase 0xffffffff80000000
 
@@ -17,7 +15,6 @@ int buffer_tail = 0;
 int buffer_size = 0;
 volatile int NEW_LINE_RECEIVED = 0;
 volatile int WAIT_FOR_USER_INPUT = 0;
-registers regs;
 
 void scroll();
 void print_new_line(volatile char ** );

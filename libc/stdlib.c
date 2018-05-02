@@ -6,7 +6,6 @@
 #include <sys/syscall.h>
 
 void *malloc(size_t size) {
-  //TODO: instead of calling kmalloc, implement a code which will book user level pages.
 //  void *new_pages = (void *) kmalloc(size);
   int temp_val;
   __asm__ __volatile__ (

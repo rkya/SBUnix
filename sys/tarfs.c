@@ -233,24 +233,3 @@ ssize_t t_read(int fd, char *buffer, uint64_t size) {
   //return the value min(size, remaining file)
   return (ssize_t)(i - previous_position);
 }
-
-Elf64_Ehdr *t_get_elf_header(char *filename) {
-  int file_index = t_tarfs_get_index(filename);
-  if(file_index < 0 || file_index >= MAX_VFS_SIZE) {
-    return NULL;
-  }
-  struct posix_header_ustar *tarfs_ptr = vfs[file_index].tarfs_ptr;
-  //struct Elf64_Ehdr *p = (struct Elf64_Ehdr *)((traverse_tarfs(filename)));
-  //void *temp = (void *)((traverse_tarfs(filename)));
-  //Elf64_Ehdr *p = (Elf64_Ehdr *) traverse_tarfs(filename);
-  if(tarfs_ptr == NULL) {
-    kprintf("File not found.\n");
-    return NULL;
-  } else {
-    kprintf("tarfs_ptr->name: %s.\n", tarfs_ptr->name);
-    Elf64_Ehdr *elf64_ehdr_ptr = (Elf64_Ehdr *)((char *)tarfs_ptr + sizeof(struct posix_header_ustar));
-    //Elf64_Ehdr *ehdr = (Elf64_Ehdr *)p;
-    kprintf("elf64_ehdr_ptr->e_ident[1] = %c.\n", elf64_ehdr_ptr->e_ident[1]);
-    return elf64_ehdr_ptr;
-  }
-}

@@ -81,6 +81,16 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     ```
     ps
     ```
+  * Kill a process
+      ```
+      kill -9 <pid>
+      e.g.
+      kill -9 1
+      ```
+      If you kill a process with pid > 1, the process will be killed.<br/>
+      But if you try to kill process with pid 1, SBUnix will ask you if
+      you want to shut down the system as this is the special sbush
+      process which runs as soon as you start the SBUnix.
   * Print the contents of the file on the terminal
     ```
     cat <Path/To/The/File>
@@ -103,16 +113,6 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
     e.g.
     sleep 5
     ```
-  * Kill a process
-    ```
-    kill -9 <pid>
-    e.g.
-    kill -9 1
-    ```
-    If you kill a process with pid > 1, the process will be killed.<br/>
-    But if you try to kill process with pid 1, SBUnix will ask you if
-    you want to shut down the system as this is the special sbush
-    process which runs as soon as you start the SBUnix.
   * Shutdown SBUnix
       ```
       shutdown

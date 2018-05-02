@@ -56,14 +56,5 @@ void t_print_vfs();
 int t_tarfs_get_index(const char *);
 int t_get_children_index(const char *, int *, int);
 ssize_t t_read(int , char *, uint64_t );
-Elf64_Ehdr *t_get_elf_header(char *);
-/*uint64_t tar_lookup(char *);
-uint64_t tar_ls(char *);
-void get_file_content(char *);
-int test_offset(char *);
-int get_file_offset(char *);
-struct posix_header_ustar *get_tarfs(char *);
-struct posix_header_ustar *traverse_tarfs(char *);
-struct file *open_tarfs(struct posix_header_ustar *);*/
 
 #endif

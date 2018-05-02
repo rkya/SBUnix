@@ -19,9 +19,6 @@ extern char kernmem, physbase;
 
 void loop() {
   while(1) {
-//    kprintf("Reached the end of start function...\n");
-    //p_remove_process(p_get_current_process());
-    //t_timer_interrupt_action();
     yield();
   }
 }
@@ -29,10 +26,8 @@ void loop() {
 void add_first_process() {
   pcb *p1 = p_get_new_process("main");
   p1->state = RUNNING;
-  //p1->ppid = -1;
   p1->pid = 0;
   void (*f_ptr3)() = &loop;
-//  void (*f_ptr3)() = &t_timer_interrupt_action;
   p1->kstack[127] = (uint64_t)f_ptr3;
 }
 

@@ -10,17 +10,10 @@ void idt_set_gate(int index, uint64_t offset, uint16_t selector, uint16_t ist, i
   idt[index].low_offset = offset & 0xffff;
   idt[index].selector = selector;
   idt[index].ist = ist;
-  //idt[index].reserved0 = 0;
-  //idt[index].reserved1 = 0;
-  //idt[index].reserved2 = 0;
   idt[index].type = type;
-  //idt[index].reserved3 = 0;
-  //idt[index].dpl = dpl;
-  //idt[index].p = p;
   idt[index].mid_offset = (offset >> 16) & 0xffff;
   idt[index].high_offset = (offset >> 32) & 0xffffffff;
   idt[index].zero = 0;
-  //idt[index].reserved = 0;
 }
 
 /***
@@ -73,12 +66,6 @@ void i_init_idt() {
   idt_set_gate(29, (uint64_t)isr29, 0x08, 0, 0x8e, 0, 1);
   idt_set_gate(30, (uint64_t)isr30, 0x08, 0, 0x8e, 0, 1);
   idt_set_gate(31, (uint64_t)isr31, 0x08, 0, 0x8e, 0, 1);
-
-  // int i;
-  // for(i = 0; i < 256; i++) {
-  // 	idt_set_gate(i, (uint64_t)&isr32, 0x08, 0, 0x8e, 0, 1);
-  // }
-
 
   __asm__ __volatile__ ("sti");
 

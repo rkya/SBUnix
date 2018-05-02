@@ -17,12 +17,6 @@
 #define COMMAND_MAX_LENGTH 128
 #define COMMAND_MAX_ARGUMENTS 128
 
-//static FILE *stderr = NULL;
-//static FILE *stdin = NULL;
-
-//extern char environment_variables[MAX_ENV_VARIABLES][MAX_ENV_VARIABLES_SIZE];
-//extern int environment_variables_size;
-
 char **env_variables = NULL;
 
 void sbush_export_command(char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH]) {
@@ -349,9 +343,7 @@ int sbush_is_input_empty(char *sbush_cmd) {
 
 void sbush_execute_cmd(char *sbush_cmd) {
   char sbush_cmd_tokens[COMMAND_MAX_ARGUMENTS][COMMAND_MAX_LENGTH];
-  pid_t pid;
 //  int return_code;
-  int start_background = 0;
   int position = 0;
 
   if( sbush_is_input_empty(sbush_cmd) ) {
@@ -362,7 +354,6 @@ void sbush_execute_cmd(char *sbush_cmd) {
 
   while(sbush_cmd_tokens[position][0] != '\0' && position < COMMAND_MAX_ARGUMENTS){
     if(!strcmp(sbush_cmd_tokens[position], "&")){
-      start_background = 1;
       sbush_cmd_tokens[position][0] = '\0';
     }
     position++;
@@ -393,7 +384,7 @@ void sbush_execute_cmd(char *sbush_cmd) {
     sbush_kill_command(sbush_cmd_tokens);
   } else if(!strcmp(sbush_cmd_tokens[0], "shutdown")) {
     sbush_shutdown_command(sbush_cmd_tokens);
-  } else if(!strcmp(sbush_cmd_tokens[0], "user")) {
+  } /*else if(!strcmp(sbush_cmd_tokens[0], "user")) {
     //p_switch_to_user_mode();
     int ans = printf("Testing syscall from printf.\n");
     ans = printf("returned value = %d.\n", ans);
@@ -404,31 +395,15 @@ void sbush_execute_cmd(char *sbush_cmd) {
     printf("integer value = %d.\n", 10);
     printf("hex value = %x.\n", 0);
     printf("pointer value = %p.\n", 0);
-    /*int val;
+    *//*int val;
     __asm__ __volatile__ (
     "int $0x80;"
     : "=a" (val)
     : "0"(SYSCALL_KPRINTF)
     : "cc", "rcx", "r11", "memory"
-    );*/
-  } else {
+    );*//*
+  }*/ else {
     printf("%s: command not found\n", sbush_cmd_tokens[0]);
-    pid = fork();
-    if(pid == 0){
-      //const char *file, char *const argv[]
-      /*return_code = execvp(sbush_cmd_tokens[0], sbush_cmd_tokens);
-      if(return_code == -1){
-        fprintf(stderr, "sbush:error:no such command:'%s'\n", sbush_cmd_tokens[0]);
-      }*/
-    } else if(pid < 0) {
-      fprintf(stderr, "sbush:error:Problem while forking\n");
-      exit(EXIT_FAILURE);
-    } else {
-      if(start_background) {
-        return;
-      }
-      wait(NULL);
-    }
   }
 }
 
@@ -491,13 +466,6 @@ int test_sbush_main() {
   while(!feof(stdin)){
     char *sbush_cmd = NULL;
     char current_working_directory[64];
-
-//    if(argc == 2){
-//      sbush_execute_script(argv);
-//    }
-
-    /*pcb *temp = p_get_current_process();
-    kprintf("pid = %d\n", temp->pid);*/
 
     if(getcwd(current_working_directory, sizeof(current_working_directory)) == NULL) {
       current_working_directory[0] = '\0';
