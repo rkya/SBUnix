@@ -1,6 +1,8 @@
 #include <sys/kprintf.h>
 #include <sys/io.h>
 
+//References: https://wiki.osdev.org/Printing_To_Screen
+
 #define kernbase 0xffffffff80000000
 
 //extern void yield();

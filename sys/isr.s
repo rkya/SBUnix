@@ -1,5 +1,7 @@
 .text
 
+#References: http://www.jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
+
 #ISRs:
 
 .global isr0

@@ -1,6 +1,10 @@
 #include <sys/paging.h>
 #include <sys/kprintf.h>
 
+//References: https://wiki.osdev.org/Page_Tables
+//http://www.noteblok.net/wp-content/uploads/sites/3/2015/01/Self-referenced_Page_Tables-Vogel-ASPLOS_SrC.pdf
+//https://wiki.osdev.org/Paging
+
 Page *free_list_head;
 Page *entire_list;
 Page *el_end; //entire list end

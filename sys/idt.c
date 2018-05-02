@@ -1,6 +1,8 @@
 #include <sys/idt.h>
 #include <sys/kprintf.h>
 
+//References: http://www.jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
+
 static struct idt_t idt[256];
 static struct idtr_t idtr;
 void _x86_64_asm_lidt(struct idtr_t*);

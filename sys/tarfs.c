@@ -1,6 +1,8 @@
 #include <sys/tarfs.h>
 #include <sys/kprintf.h>
 
+//References: https://wiki.osdev.org/USTAR
+
 void vfs_add(struct posix_header_ustar *tarfs_ptr, int offset, char *contents);
 int get_parent_index(char *file_name, int slash_count);
 void vfs_insert(int index, char *name, int parent_index, uint64_t size, char file_type,

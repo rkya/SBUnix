@@ -4,11 +4,12 @@ This is a preemptive multi-tasking operating system called SBUnix
 developed as a part of operating systems course in Stony Brook
 University.
 I have implemented paging, free list, kmalloc, interrupts, scheduling,
-context switching, terminal and syscalls. SBUnix also contains binaries
-like echo, sleep, cat, ls, kill and ps. Note that the binaries are not
-present in the standard path of ```/bin``` but they are present as
-functions in the ```/sys/test_sbush.c``` file. This is because I was
-unable to load binaries from the ELF.
+task switching, terminal, syscalls, kernel-threads, VFS and tarfs file
+access. SBUnix also contains binaries like echo, sleep, cat, ls, kill
+and ps. Note that the binaries are not present in the standard path of
+```/bin``` but they are present as functions in the
+```/sys/test_sbush.c``` file. This is because I was unable to load
+binaries from the ELF.
 
 # Functionalities Completed
 
@@ -17,7 +18,7 @@ unable to load binaries from the ELF.
   * tarfs: open, read, close, opendir, readdir, closedir
   * read(stdin), write(stdout), write(stderr)
   * Binaries: echo, sleep, cat, ls, kill -9, ps (present in ```/sys/test_sbush.c```)
-  * Able to run my own sbush (sbush code is present in /sys/test_sbush.c)
+  * Able to run my own sbush (sbush code is present in ```/sys/test_sbush.c```)
 
     I wasn't able to switch to ring 3 to load binary. The code exists
     but has some bugs in it. Therefore the SBUnix currently runs fine
@@ -178,3 +179,13 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
   or files in the ```/bin``` directory as the SBUnix may crash.
   * The tarfs is set to load files only in the ```/bin``` and ```/etc```
   folders. Files from any other folders may not load.
+
+# References
+
+  * http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html
+  * https://eli.thegreenplace.net/2011/09/06/stack-frame-layout-on-x86-64/
+  * https://wiki.osdev.org/USTAR
+  * http://www.osdever.net/bkerndev/Docs/intro.htm
+  * http://www.jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
+  * https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
+  * https://notes.shichao.io/lkd/ch15/

@@ -1,6 +1,10 @@
 #ifndef _PAGING_H
 #define _PAGING_H
 
+//References: https://wiki.osdev.org/Page_Tables
+//http://www.noteblok.net/wp-content/uploads/sites/3/2015/01/Self-referenced_Page_Tables-Vogel-ASPLOS_SrC.pdf
+//https://wiki.osdev.org/Paging
+
 #include <sys/defs.h>
 #include <sys/mm.h>
 #include <sys/terminal.h>

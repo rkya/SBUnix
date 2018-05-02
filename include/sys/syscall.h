@@ -1,6 +1,9 @@
 #ifndef _SYSCALL_H
 #define _SYSCALL_H
 
+//References: https://wiki.osdev.org/System_Calls
+//http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
+
 #include <sys/defs.h>
 #include <sys/registers.h>
 #include <sys/kprintf.h>

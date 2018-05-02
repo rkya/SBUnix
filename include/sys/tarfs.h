@@ -1,6 +1,8 @@
 #ifndef _TARFS_H
 #define _TARFS_H
 
+//References: https://wiki.osdev.org/USTAR
+
 #include <string.h>
 #include <math.h>
 #include <sys/defs.h>

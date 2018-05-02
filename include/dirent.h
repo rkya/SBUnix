@@ -6,7 +6,7 @@
 #define NAME_MAX 255
 #define MAX_VFS_INDEXES 128
 
-//Contents of dirent structure: https://stackoverflow.com/questions/12991334/members-of-dirent-structure
+//References: https://stackoverflow.com/questions/12991334/members-of-dirent-structure
 struct dirent {
   char d_name[NAME_MAX+1];
   char d_type;

@@ -3,6 +3,9 @@
 #include <sys/process.h>
 #include <sys/terminal.h>
 
+//References: https://wiki.osdev.org/System_Calls
+//http://www.jamesmolloy.co.uk/tutorial_html/10.-User%20Mode.html
+
 void s_syscall_handler(registers *regs)
 {
   uint64_t syscall_number = regs->rax;

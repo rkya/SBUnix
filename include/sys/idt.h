@@ -1,6 +1,8 @@
 #ifndef _IDT_H
 #define _IDT_H
 
+//References: http://www.jamesmolloy.co.uk/tutorial_html/4.-The%20GDT%20and%20IDT.html
+
 #include <sys/defs.h>
 #include <sys/io.h>
 

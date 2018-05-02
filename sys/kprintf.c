@@ -1,4 +1,7 @@
 #include <sys/kprintf.h>
+
+//References: https://wiki.osdev.org/Printing_To_Screen
+
 //#include <sys/io.h>
 
 /*
