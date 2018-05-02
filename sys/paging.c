@@ -2,6 +2,7 @@
 #include <sys/kprintf.h>
 
 //References: https://wiki.osdev.org/Page_Tables
+//https://os.phil-opp.com/page-tables/
 //http://www.noteblok.net/wp-content/uploads/sites/3/2015/01/Self-referenced_Page_Tables-Vogel-ASPLOS_SrC.pdf
 //https://wiki.osdev.org/Paging
 
