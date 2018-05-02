@@ -12,12 +12,12 @@ unable to load binaries from the ELF.
 
 # Functionalities Completed
 
-  * All functions from include/*.h work
+  * Most functions from include/*.h work
   * Virtual memory, user processes
   * tarfs: open, read, close, opendir, readdir, closedir
   * read(stdin), write(stdout), write(stderr)
-  * Binaries: echo, sleep, cat, ls, kill -9, ps
-  * Able to run my own sbush
+  * Binaries: echo, sleep, cat, ls, kill -9, ps (present in ```/sys/test_sbush.c```)
+  * Able to run my own sbush (sbush code is present in /sys/test_sbush.c)
 
     I wasn't able to switch to ring 3 to load binary. The code exists
     but has some bugs in it. Therefore the SBUnix currently runs fine
@@ -47,7 +47,7 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
 
     At the (gdb) prompt, connect with:
     ```
-    target remote localhost:9999
+    target remote localhost:9961
     ```
 
 # Commands supported
