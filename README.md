@@ -6,23 +6,8 @@ University.
 I have implemented paging, free list, kmalloc, interrupts, scheduling,
 task switching, terminal, syscalls, kernel-threads, VFS and tarfs file
 access. SBUnix also contains binaries like echo, sleep, cat, ls, kill
-and ps. Note that the binaries are not present in the standard path of
-```/bin``` but they are present as functions in the
-```/sys/test_sbush.c``` file. This is because I was unable to load
-binaries from the ELF.
+and ps. 
 
-# Functionalities Completed
-
-  * Most functions from include/*.h work
-  * Virtual memory, user processes
-  * tarfs: open, read, close, opendir, readdir, closedir
-  * read(stdin), write(stdout), write(stderr)
-  * Binaries: echo, sleep, cat, ls, kill -9, ps (present in ```/sys/test_sbush.c```)
-  * Able to run my own sbush (sbush code is present in ```/sys/test_sbush.c```)
-
-    I wasn't able to switch to ring 3 to load binary. The code exists
-    but has some bugs in it. Therefore the SBUnix currently runs fine
-    in ring 0.
 
 # Running The OS
 
@@ -118,67 +103,6 @@ qemu-system-x86_64 -curses -drive id=boot,format=raw,file=$USER.img,if=none -dri
       ```
       shutdown
       ```
-
-# Testing some additional functionalities
-
-## Testing preemptive task switching
-
-  * Uncomment the two lines in the ```switch_to()``` function present
-  in the ```/sys/process.c:304``` and ```/sys/process.c:305```.
-  * You will see something like this every 1 second:
-    ```
-    Value in rsp p1 is 0xffffffff8026b590
-    value in rsp p2 is 0xffffffff80396200
-    Value in rsp p1 is 0xffffffff80396200
-    value in rsp p2 is 0xffffffff8026b590
-    ```
-    <b>Explaination:</b>
-  The p1 address is the rsp of the current running process and p2
-  address is the rsp of the new process that the scheduler has picked
-  to run. <br/>
-  Initially, the sbush process is running and its rsp is
-  0xffffffff8026b590, lets call it process A. After 1 second, the SBUnix
-  received a timer interrupt which called the scheduler and the current
-  process got switched to process B with the rsp 0xffffffff80396200.
-  The other process B is the original process that initialized the
-  SBUnix and created a process - sbush and it does not have anything
-  significant to work, hence it yeilds in a continuous ```while()```
-  loop. As the B yeilds, the scheduler kicks in and swithcs to A back
-  as there are no other processes. So, you see line 3 and 4 where the
-  switch happens from process B to process A. This change happens
-  immediately, hence you will see the 4 lines printed continuously in a
-  interval of 1 second. <br/>
-  Note that the addresses printed may vary.<br/>
-  I have currently set the preemptive switching frequency to 1 switch
-  per second for the ease of testing. You can set it to the frequency
-  of the timer interrupt of SBUnix i.e. 100 times per second.
-
-## Testing your sbush
-
-  * Since I wasn't able to load the binary, you cannot load your sbush
-  directly by placing it in ```/rootfs/bin/sbush```.
-  * You will need to copy all the contents of your sbush in
-  ```/sys/test_sbush.c``` and place all the contents of your main in
-  the ```test_sbush_main``` function.
-  * This is because when the sbush process is created, the function
-  pointer of this function is given to the process as a starting point
-  of execution.
-
-## Testing my binaries
-
-  * All the executables that I have written can be tested directly by
-  commands like echo, sleep, cat, ls, kill and ps as mentioned above as
-  the contents of the binaries are directly placed in their respective
-  functions in my sbush.
-
-# Additional points to note
-
-  * The code for sbush is written in the ```/sys/test_sbush.c``` file
-  and not in the standard ```/bin/sbush``` directory.
-  * Since I was unable to load binaries from ELF, do not add executables
-  or files in the ```/bin``` directory as the SBUnix may crash.
-  * The tarfs is set to load files only in the ```/bin``` and ```/etc```
-  folders. Files from any other folders may not load.
 
 # References
 
